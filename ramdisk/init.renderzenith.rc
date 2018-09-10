@@ -1,0 +1,119 @@
+on early-init	
+    # Tweak IO performance during boot up
+    write /sys/block/dm-0/queue/read_ahead_kb 2048
+    write /sys/block/dm-1/queue/read_ahead_kb 2048
+    write /sys/block/sda/queue/read_ahead_kb 2048
+    write /sys/block/sda/queue/iostats 0
+    write /sys/block/sda/queue/nr_requests 256
+    write /sys/block/sde/queue/read_ahead_kb 2048
+    write /sys/block/sde/queue/iostats 0
+    write /sys/block/sde/queue/nr_requests 256
+    write /sys/block/sda/queue/iosched/slice_idle 0
+
+on init
+    # set default schedTune value for foreground/top-app (only affects EAS)
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.boost 0
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.dynamic_boost 1
+    write /dev/stune/top-app/schedtune.sched_boost 50
+    write /dev/stune/schedtune.sched_boost 10
+    write /dev/stune/rt/schedtune.boost 0
+    write /dev/stune/rt/schedtune.prefer_idle 1
+
+on boot
+    # Update foreground and background cpusets
+    write /dev/cpuset/top-app/cpus 0-3
+    write /dev/cpuset/foreground/cpus 0-3
+    write /dev/cpuset/foreground/boost/cpus 2
+    write /dev/cpuset/background/cpus 0
+    write /dev/cpuset/system-background/cpus 0-1,3
+
+on post-fs-data
+    # Bind mount modules and custom system blobs
+    mount auto /perfboostsconfig.xml /system/vendor/etc/perf/perfboostsconfig.xml bind
+    mount auto /modules/ansi_cprng.ko /system/lib/modules/ansi_cprng.ko bind
+    mount auto /modules/backlight.ko /system/lib/modules/backlight.ko bind
+    mount auto /modules/br_netfilter.ko /system/lib/modules/br_netfilter.ko bind
+    mount auto /modules/evbug.ko /system/lib/modules/evbug.ko bind
+    mount auto /modules/generic_bl.ko /system/lib/modules/generic_bl.ko bind
+    mount auto /modules/lcd.ko /system/lib/modules/lcd.ko bind
+    mount auto /modules/rdbg.ko /system/lib/modules/rdbg.ko bind
+    mount auto /modules/spidev.ko /system/lib/modules/spidev.ko bind
+    mount auto /modules/wil6210.ko /system/lib/modules/wil6210.ko bind
+    mount auto /modules/wlan.ko /system/lib/modules/qca_cld/qca_cld_wlan.ko bind
+
+on property:sys.post_boot.parsed=1
+    # update cpusets now that boot is complete and we want better load balancing
+    write /dev/cpuset/top-app/cpus 0-3
+    write /dev/cpuset/foreground/cpus 0-3
+    write /dev/cpuset/foreground/boost/cpus 0-3
+    write /dev/cpuset/background/cpus 0-3
+    write /dev/cpuset/system-background/cpus 0-3
+
+    # Will only work if using EAS
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor "schedutil"
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us 500
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us 20000
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/iowait_boost_enable 0
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us 500
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us 20000
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable 0
+
+    # CPUFreq control
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2188800
+    write /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq 2188800
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq 2342400
+    write /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq 2342400
+
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+
+    # Enable input boost configuration
+    write /sys/module/cpu_boost/parameters/input_boost_freq "0:844800 2:614400"
+    write /sys/module/cpu_boost/parameters/input_boost_ms 40
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 50
+
+    # Set idle GPU to 133 Mhz
+    write /sys/class/kgsl/kgsl-3d0/default_pwrlevel 7    
+
+    # I/O
+    # Tweak IO performance after boot complete
+    setprop sys.io.scheduler "maple"
+    write /sys/block/dm-0/queue/scheduler "maple"
+    write /sys/block/dm-1/queue/scheduler "maple"
+    write /sys/block/sda/queue/scheduler "maple"
+    write /sys/block/sde/queue/scheduler "maple"
+    write /sys/block/dm-0/queue/read_ahead_kb 512
+    write /sys/block/dm-1/queue/read_ahead_kb 512
+    write /sys/block/sda/queue/read_ahead_kb 512
+    write /sys/block/sda/queue/iostats 1
+    write /sys/block/sda/queue/nr_requests 128
+    write /sys/block/sde/queue/read_ahead_kb 512
+    write /sys/block/sde/queue/iostats 1
+    write /sys/block/sde/queue/nr_requests 128
+
+    # according to Qcom this legacy value improves first launch latencies
+    # stock value is 512k
+    setprop dalvik.vm.heapminfree 2m
+
+    # enable dynamic fsync
+    write /sys/kernel/dyn_fsync/Dyn_fsync_active 1
+
+service msm_irqbalance /vendor/bin/msm_irqbalance -f /vendor/etc/msm_irqbalance.conf
+    socket msm_irqbalance seqpacket 660 root system
+    class core
+    user root
+    group root
+    writepid /dev/cpuset/system-background/tasks

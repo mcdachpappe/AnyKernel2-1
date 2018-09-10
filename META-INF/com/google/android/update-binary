@@ -71,6 +71,8 @@ if [ -f /tmp/anykernel/banner ]; then
   ui_print " ";
 fi;
 
+sleep 2
+
 ui_print "$(file_getprop /tmp/anykernel/anykernel.sh kernel.string)";
 if [ -f /tmp/anykernel/version ]; then
   ui_print " ";
@@ -86,22 +88,9 @@ ui_print " ";
 ui_print "My greatest gratitude to the following";
 ui_print "people who kept the dream alive:";
 ui_print " ";
-ui_print " Prithvi";
-ui_print " Tom";
-ui_print " Michael";
-ui_print " Sebastian";
-ui_print " Alec";
-ui_print " Animesh";
-ui_print " Laurent";
-ui_print " Aleman";
-ui_print " Jeremy";
-ui_print " Piyush";
-ui_print " Rafael";
-ui_print " Benjamin";
-ui_print " Vibhoothi";
-ui_print " Nico";
-ui_print " Toni";
-ui_print " Adam";
+ui_print "Prithvi, Tom, Michael, Sebastian, Alex, Animesh";
+ui_print "Laurent, Aleman, Jeremy, Piyush, Rafael,";
+ui_print "Benjamin, Vibhoothi, Nico, Toni, Adam";
 ui_print " ";
 
 unmount_all;

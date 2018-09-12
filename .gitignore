@@ -9,4 +9,5 @@
 #
 # Ignore some dirs and files
 ramdisk/modules/*
+ramdisk/modules/placeholder
 zImage

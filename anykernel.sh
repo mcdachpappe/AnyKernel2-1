@@ -3,21 +3,20 @@
 
 ## AnyKernel setup
 # begin properties
-properties() { '
-kernel.string=ExampleKernel by osm0sis @ xda-developers
+properties() {
+kernel.string=RenderZenith kernel for OP3 modified by mcd
 do.devicecheck=1
 do.modules=0
 do.cleanup=1
 do.cleanuponabort=0
-device.name1=maguro
-device.name2=toro
-device.name3=toroplus
-device.name4=
-device.name5=
-'; } # end properties
+device.name1=OnePlus3
+device.name2=oneplus3
+device.name3=OnePlus3T
+device.name4=oneplus3t
+} # end properties
 
 # shell variables
-block=/dev/block/platform/omap/omap_hsmmc.0/by-name/boot;
+block=/dev/block/bootdevice/by-name/boot;
 is_slot_device=0;
 ramdisk_compression=auto;
 
@@ -30,34 +29,35 @@ ramdisk_compression=auto;
 ## AnyKernel file attributes
 # set permissions/ownership for included ramdisk files
 chmod -R 750 $ramdisk/*;
-chmod -R 755 $ramdisk/sbin;
 chown -R root:root $ramdisk/*;
-
 
 ## AnyKernel install
 dump_boot;
 
 # begin ramdisk changes
+insert_line init.rc "init.renderzenith.rc" after "import /init.environ.rc" "import /init.renderzenith.rc\n";
 
-# init.rc
-backup_file init.rc;
-replace_string init.rc "cpuctl cpu,timer_slack" "mount cgroup none /dev/cpuctl cpu" "mount cgroup none /dev/cpuctl cpu,timer_slack";
+# sepolicy
+$bin/magiskpolicy --load sepolicy --save sepolicy \
+    "allow init rootfs file execute_no_trans" \
+    "allow { init modprobe } rootfs system module_load" \
+    "allow init { system_file vendor_file vendor_configs_file } file mounton" \
+    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } { file dir} { getattr read open search } " \
+    ;
 
-# init.tuna.rc
-backup_file init.tuna.rc;
-insert_line init.tuna.rc "nodiratime barrier=0" after "mount_all /fstab.tuna" "\tmount ext4 /dev/block/platform/omap/omap_hsmmc.0/by-name/userdata /data remount nosuid nodev noatime nodiratime barrier=0";
-append_file init.tuna.rc "bootscript" init.tuna;
+# sepolicy_debug
+$bin/magiskpolicy --load sepolicy_debug --save sepolicy_debug \
+    "allow init rootfs file execute_no_trans" \
+    "allow { init modprobe } rootfs system module_load" \
+    "allow init { system_file vendor_file vendor_configs_file } file mounton" \
+    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } { file dir} { getattr read open search } " \
+    ;
 
-# fstab.tuna
-backup_file fstab.tuna;
-patch_fstab fstab.tuna /system ext4 options "noatime,barrier=1" "noatime,nodiratime,barrier=0";
-patch_fstab fstab.tuna /cache ext4 options "barrier=1" "barrier=0,nomblk_io_submit";
-patch_fstab fstab.tuna /data ext4 options "data=ordered" "nomblk_io_submit,data=writeback";
-append_file fstab.tuna "usbdisk" fstab;
+# Give modules in ramdisk appropriate permissions to allow them to be loaded
+find $ramdisk/modules -type f -exec chmod 644 {} \;
 
 # end ramdisk changes
 
 write_boot;
 
 ## end install
-

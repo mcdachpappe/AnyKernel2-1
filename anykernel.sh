@@ -59,7 +59,6 @@ dump_boot;
 # begin ramdisk changes
 
 # Import rz-mcd.rc
-remove_line init.rc "init.renderzenith.rc\n";
 remove_line init.rc "init.rz-mcd.rc";
 insert_line init.rc "init.rz-mcd.rc" after "import /init.environ.rc" "import /init.rz-mcd.rc";
 

@@ -15,7 +15,7 @@ on init
     write /dev/stune/foreground/schedtune.prefer_idle 1
     write /dev/stune/top-app/schedtune.boost 1
     write /dev/stune/top-app/schedtune.prefer_idle 1
-    write /dev/stune/top-app/schedtune.sched_boost 10
+    write /dev/stune/top-app/schedtune.sched_boost 30
     
     # Set freqs according to msm8996 specs and drop write bit 
     # so that libqti-perfd can't set it
@@ -83,9 +83,9 @@ on property:sys.post_boot.parsed=1
     write /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq 307200
 
     # Enable input boost configuration
-    write /sys/module/cpu_boost/parameters/input_boost_freq "0:844800 2:614400"
+    write /sys/module/cpu_boost/parameters/input_boost_freq "0:844800 2:691200"
     write /sys/module/cpu_boost/parameters/input_boost_ms 40
-    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 10
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 30
 
     # Enable Adaptive LMK
     write /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk 1

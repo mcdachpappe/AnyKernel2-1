@@ -57,9 +57,9 @@ dump_boot;
 
 
 # begin ramdisk changes
-
 # Import mcd.rc
-remove_line init.rc "init.mcd.rc";
+remove_line init.rc "init.renderzenith.rc";
+remove_line init.rc "init.rz-mcd.rc";
 insert_line init.rc "init.mcd.rc" after "import /init.environ.rc" "import /init.mcd.rc";
 
 # sepolicy

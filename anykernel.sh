@@ -61,6 +61,7 @@ dump_boot;
 remove_line init.rc "init.renderzenith.rc";
 remove_line init.rc "init.rz-mcd.rc";
 insert_line init.rc "init.mcd.rc" after "import /init.environ.rc" "import /init.mcd.rc";
+insert_line default.prop "ro.sys.fw.bg_apps_limit=60" before "ro.secure" "ro.sys.fw.bg_apps_limit=60";
 
 # sepolicy
 $bin/magiskpolicy --load sepolicy --save sepolicy \

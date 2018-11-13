@@ -68,8 +68,17 @@ $bin/magiskpolicy --load sepolicy --save sepolicy \
     "allow init rootfs file execute_no_trans" \
     "allow { init modprobe } rootfs system module_load" \
     "allow init { system_file vendor_file vendor_configs_file } file mounton" \
-    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } file { getattr read open } " \
-    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } dir { getattr read open } " \
+    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } file { getattr read open }" \
+    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } dir { getattr read open }" \
+    "allow hal_perf_default hal_perf_default capability { kill }" \
+    "allow hal_perf_default kernel dir { read search open }" \
+    "allow hal_drm_default oem_prop file { getattr }" \
+    "allow hal_iop_default priv_app dir { search }" \
+    "allow untrusted_app proc_stat file { read }" \
+    "allow hal_memtrack_default qti_debugfs file { read open getattr }" \
+    "allow untrusted_app proc_stat file { read open getattr }" \
+    "allow untrusted_app qti_debugfs dir { search }" \
+    "allow untrusted_app hal_memtrack_hwservice hwservice_manager { find }" \
     ;
 
 # sepolicy_debug
@@ -77,8 +86,17 @@ $bin/magiskpolicy --load sepolicy_debug --save sepolicy_debug \
     "allow init rootfs file execute_no_trans" \
     "allow { init modprobe } rootfs system module_load" \
     "allow init { system_file vendor_file vendor_configs_file } file mounton" \
-    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } file { getattr read open } " \
-    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } dir { getattr read open } " \
+    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } file { getattr read open }" \
+    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } dir { getattr read open }" \
+    "allow hal_perf_default hal_perf_default capability { kill }" \
+    "allow hal_perf_default kernel dir { read search open }" \
+    "allow hal_drm_default oem_prop file { getattr }" \
+    "allow hal_iop_default priv_app dir { search }" \
+    "allow untrusted_app proc_stat file { read }" \
+    "allow hal_memtrack_default qti_debugfs file { read open getattr }" \
+    "allow untrusted_app proc_stat file { read open getattr }" \
+    "allow untrusted_app qti_debugfs dir { search }" \
+    "allow untrusted_app hal_memtrack_hwservice hwservice_manager { find }" \
     ;
 
 # Give modules in ramdisk appropriate permissions to allow them to be loaded

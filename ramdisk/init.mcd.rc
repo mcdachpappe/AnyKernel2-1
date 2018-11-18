@@ -122,6 +122,8 @@ on property:sys.post_boot.parsed=1
     exec u:r:magisk:s0 root root -- /init.special_power.sh
     exec u:r:supersu:s0 root root -- /init.special_power.sh
 
+    write /dev/kmsg "mcd boot completed"
+
 service msm_irqbalance /vendor/bin/msm_irqbalance -f /vendor/etc/msm_irqbalance.conf
     socket msm_irqbalance seqpacket 660 root system
     class core

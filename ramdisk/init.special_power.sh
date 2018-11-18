@@ -70,3 +70,5 @@ writepid_sbg $LOGCAT
 writepid_sbg $LMKD
 
 }&
+
+write /dev/kmsg "mcd special power executed"

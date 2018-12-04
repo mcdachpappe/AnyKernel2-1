@@ -39,11 +39,13 @@ on boot
     chown system system /dev/cpuset/camera-daemon/tasks
     chmod 0664 /dev/cpuset/camera-daemon/tasks
 
-    # thermal and bcl hotplug
-    write /sys/devices/soc/soc:qcom,bcl/mode "disable"
-    write /sys/devices/soc/soc:qcom,bcl/hotplug_mask 12
-    write /sys/devices/soc/soc:qcom,bcl/hotplug_soc_mask 8
-    write /sys/devices/soc/soc:qcom,bcl/mode "enable"
+    # Set light thermal restrictions while optimizing apps
+    # [throttle_freq_LITTLE, throttle_freq_big, throttle_temp, unthrottle_temp]
+    write /sys/kernel/msm_thermal/zone0 "1228800 1632000 46 44"
+    write /sys/kernel/msm_thermal/zone1 "1228800 1555200 50 47"
+    write /sys/kernel/msm_thermal/zone2 "1036800 1248000 55 53"
+    write /sys/kernel/msm_thermal/zone3 "729600 729600 65 63"
+    write /sys/kernel/msm_thermal/enabled 1
 
 on post-fs-data
     # Bind mount modules and custom system blobs
@@ -109,6 +111,20 @@ on property:sys.post_boot.parsed=1
     write /sys/block/sde/queue/read_ahead_kb 512
     write /sys/block/sde/queue/iostats 1
     write /sys/block/sde/queue/nr_requests 128
+
+    # Set thermal restrictions
+    write /sys/kernel/msm_thermal/enabled 0
+    write /sys/kernel/msm_thermal/zone0 "1401600 1785600 40 38"
+    write /sys/kernel/msm_thermal/zone1 "1324800 1555200 41 40"
+    write /sys/kernel/msm_thermal/zone2 "1228800 1478400 42 41"
+    write /sys/kernel/msm_thermal/zone3 "1228800 1401600 43 42"
+    write /sys/kernel/msm_thermal/zone4 "1190400 1324800 44 43"
+    write /sys/kernel/msm_thermal/zone5 "1190400 1248000 46 44"
+    write /sys/kernel/msm_thermal/zone6 "1113600 1190400 48 46"
+    write /sys/kernel/msm_thermal/zone7 "1036800 940800 53 50"
+    write /sys/kernel/msm_thermal/zone8 "729600 729600 65 60"
+    write /sys/kernel/msm_thermal/sampling_ms 8000
+    write /sys/kernel/msm_thermal/enabled 1
 
     # according to Qcom this legacy value improves first launch latencies
     # stock value is 512k

@@ -60,7 +60,8 @@ dump_boot;
 # Import mcd.rc
 remove_line init.rc "init.renderzenith.rc";
 remove_line init.rc "init.rz-mcd.rc";
-insert_line init.rc "init.mcd.rc" after "import /init.environ.rc" "import /init.mcd.rc";
+remove_line init.rc "init.mcd.rc";
+insert_line init.rc "init.mcd.rc" before "import /init.usb.configfs.rc" "import /init.mcd.rc";
 insert_line default.prop "ro.sys.fw.bg_apps_limit=60" before "ro.secure" "ro.sys.fw.bg_apps_limit=60";
 
 # sepolicy
@@ -77,6 +78,16 @@ $bin/magiskpolicy --load sepolicy --save sepolicy \
     "allow untrusted_app proc_stat file { read }" \
     "allow hal_memtrack_default qti_debugfs file { read open getattr }" \
     "allow untrusted_app proc_stat file { read open getattr }" \
+    "allow untrusted_app rootfs file { read open getattr }" \
+    "allow untrusted_app faceulnative_exec file { read open getattr }" \
+    "allow untrusted_app logserver_exec file { read open getattr }" \
+    "allow untrusted_app atrace_exec file { read open getattr }" \
+    "allow untrusted_app audioserver_exec file { read open getattr }" \
+    "allow untrusted_app blkid_exec file { read open getattr }" \
+    "allow untrusted_app bootanim_exec file { read open getattr }" \
+    "allow untrusted_app bootstat_exec file { read open getattr }" \
+    "allow untrusted_app cameraserver_exec file { read open getattr }" \
+    "allow untrusted_app cgroup dir { read open getattr }" \
     "allow untrusted_app qti_debugfs dir { search }" \
     "allow untrusted_app hal_memtrack_hwservice hwservice_manager { find }" \
     ;
@@ -95,6 +106,16 @@ $bin/magiskpolicy --load sepolicy_debug --save sepolicy_debug \
     "allow untrusted_app proc_stat file { read }" \
     "allow hal_memtrack_default qti_debugfs file { read open getattr }" \
     "allow untrusted_app proc_stat file { read open getattr }" \
+    "allow untrusted_app rootfs file { read open getattr }" \
+    "allow untrusted_app faceulnative_exec file { read open getattr }" \
+    "allow untrusted_app logserver_exec file { read open getattr }" \
+    "allow untrusted_app atrace_exec file { read open getattr }" \
+    "allow untrusted_app audioserver_exec file { read open getattr }" \
+    "allow untrusted_app blkid_exec file { read open getattr }" \
+    "allow untrusted_app bootanim_exec file { read open getattr }" \
+    "allow untrusted_app bootstat_exec file { read open getattr }" \
+    "allow untrusted_app cameraserver_exec file { read open getattr }" \
+    "allow untrusted_app cgroup dir { read open getattr }" \
     "allow untrusted_app qti_debugfs dir { search }" \
     "allow untrusted_app hal_memtrack_hwservice hwservice_manager { find }" \
     ;

@@ -56,13 +56,25 @@ fi
 dump_boot;
 
 
-# begin ramdisk changes
+## begin ramdisk changes
 # Import mcd.rc
 remove_line init.rc "init.renderzenith.rc";
 remove_line init.rc "init.rz-mcd.rc";
 remove_line init.rc "init.mcd.rc";
 insert_line init.rc "init.mcd.rc" before "import /init.usb.configfs.rc" "import /init.mcd.rc";
+
+## some tweaks
+# increase bg-app limits from 32 to 60
 insert_line default.prop "ro.sys.fw.bg_apps_limit=60" before "ro.secure" "ro.sys.fw.bg_apps_limit=60";
+# Enable 2.4GHz channel bonding
+$bb mount -o rw,remount -t auto /system;
+$bb mount -o rw,remount -t auto /vendor 2>/dev/null;
+replace_line /system/vendor/etc/wifi/WCNSS_qcom_cfg.ini "gChannelBondingMode24GHz=0" "gChannelBondingMode24GHz=1";
+$bb mount -o ro,remount -t auto /system;
+$bb mount -o ro,remount -t auto /vendor 2>/dev/null;
+
+unmount_all;
+
 
 # sepolicy
 $bin/magiskpolicy --load sepolicy --save sepolicy \

@@ -26,15 +26,6 @@ on boot
     write /dev/cpuset/background/cpus 0-3
     write /dev/cpuset/system-background/cpus 0-3
 
-    # add a cpuset for the camera daemon
-    # we want all cores for camera
-    mkdir /dev/cpuset/camera-daemon
-    write /dev/cpuset/camera-daemon/cpus 0-3
-    write /dev/cpuset/camera-daemon/mems 0
-    chown system system /dev/cpuset/camera-daemon
-    chown system system /dev/cpuset/camera-daemon/tasks
-    chmod 0664 /dev/cpuset/camera-daemon/tasks
-
     # Set light thermal restrictions while optimizing apps
     # [throttle_freq_LITTLE, throttle_freq_big, throttle_temp, unthrottle_temp]
     write /sys/kernel/msm_thermal/zone0 "1286400 1670400 46 44"
@@ -84,10 +75,6 @@ on enable-low-power
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 307200
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1593600
     write /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq 307200
-
-    # Enable all LPMs by default
-    # This will enable C4, D4, D3, E4 and M3 LPMs
-    write /sys/module/lpm_levels/parameters/sleep_disabled "N"
 
     # Set idle GPU to 133 Mhz (sd821)
     write /sys/class/kgsl/kgsl-3d0/default_pwrlevel 7

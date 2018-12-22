@@ -14,7 +14,7 @@ device.name2=OnePlus3T
 device.name3=oneplus3t
 device.name4=OnePlus3
 device.name5=oneplus3
-supported.versions=
+supported.versions=8.0.0
 '; } # end properties
 
 # shell variables
@@ -38,14 +38,6 @@ oos_ver=$(file_getprop /system/build.prop ro.build.ota.versionname)
 if [ -z $oos_ver ]; then
     ui_print " "
     ui_print "   Only OxygenOS is supported!"
-    ui_print "Aborting..."
-    ui_print " "
-    exit 9
-fi
-android_ver=$(file_getprop /system/build.prop ro.build.version.release)
-if [ $android_ver != "8.0.0" ]; then
-    ui_print " "
-    ui_print "   Only OxygenOS-Oreo (8.0.0) is supported!"
     ui_print "Aborting..."
     ui_print " "
     exit 9

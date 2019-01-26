@@ -66,6 +66,9 @@ on enable-low-power
     write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us 10000
     write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable 0
 
+    # Touchboost configuration
+    write /sys/module/msm_performance/parameters/touchboost 0
+
     # Input boost configuration
     write /sys/module/cpu_boost/parameters/input_boost_enabled 0
     write /sys/module/cpu_boost/parameters/input_boost_freq "0:844800 2:691200"

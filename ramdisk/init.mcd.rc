@@ -12,11 +12,13 @@ on early-init
     write /sys/block/sda/queue/iosched/slice_idle 0
 
 on init
-    # set default schedTune value for foreground/top-app (only affects EAS)
+    # Dynamic Stune Boost during sched_boost
+    write /dev/stune/top-app/schedtune.sched_boost 50
+
+    # Set default schedTune value for foreground/top-app
     write /dev/stune/foreground/schedtune.prefer_idle 1
     write /dev/stune/top-app/schedtune.boost 1
     write /dev/stune/top-app/schedtune.prefer_idle 1
-    write /dev/stune/top-app/schedtune.sched_boost 10
 
     # zRAM configuration
     write /sys/block/zram0/comp_algorithm lz4
@@ -59,9 +61,9 @@ on enable-low-power
     # Configure governor settings for little cluster
     # Will only work if using EAS
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
-    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us 1000
-    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us 10000
-    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/iowait_boost_enable 0
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us 500
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us 20000
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/iowait_boost_enable 1
 
     # Online CPU2
     write /sys/devices/system/cpu/cpu2/online 1
@@ -69,9 +71,9 @@ on enable-low-power
     # Configure governor settings for big cluster
     # Will only work if using EAS
     write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor "schedutil"
-    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us 1000
-    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us 10000
-    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable 0
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us 500
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us 20000
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable 1
 
     # Touchboost configuration
     write /sys/module/msm_performance/parameters/touchboost 0
@@ -80,8 +82,8 @@ on enable-low-power
     write /sys/module/cpu_boost/parameters/input_boost_enabled 0
     write /sys/module/cpu_boost/parameters/input_boost_freq "0:844800 2:691200"
     write /sys/module/cpu_boost/parameters/input_boost_ms 40
-    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 10
-    write /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms 40
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 50
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms 500
 
     # CPUFreq control
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 307200

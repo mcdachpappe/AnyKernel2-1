@@ -14,7 +14,7 @@ device.name2=OnePlus3T
 device.name3=oneplus3t
 device.name4=OnePlus3
 device.name5=oneplus3
-supported.versions=8.0.0
+supported.versions=
 '; } # end properties
 
 # shell variables
@@ -33,15 +33,20 @@ chmod -R 750 $ramdisk/*;
 chown -R root:root $ramdisk/*;
 
 
-## Alert of unsupported OxygenOS / Android version
+## Alert of unsupported Android version and OOS plebs
 oos_ver=$(file_getprop /system/build.prop ro.build.ota.versionname)
-if [ -z $oos_ver ]; then
-    ui_print " "
-    ui_print "   Only OxygenOS is supported!"
-    ui_print "Aborting..."
-    ui_print " "
+if [ $oos_ver != "" ]; then
+    ui_print "This kernel version was not designed for OxygenOS,"
+    ui_print "please select the OxygenOS variant of this kernel"
     exit 9
 fi
+android_ver=$(file_getprop /system/build.prop ro.build.version.release)
+case "$android_ver" in
+  "6.0"|"6.0.1"|"7.0"|"7.1"|"7.1.1"|"7.1.2") compatibility_string="your version is unsupported, expect no support from the kernel developer!";;
+  "8.0.0"|"8.1.0"|"9") compatibility_string="your version is supported!";;
+esac;
+
+ui_print "Android $android_ver detected, $compatibility_string";
 
 
 ## AnyKernel install
@@ -49,24 +54,12 @@ dump_boot;
 
 
 ## begin ramdisk changes
+
 # Import mcd.rc
-remove_line init.rc "init.renderzenith.rc";
-remove_line init.rc "init.rz-mcd.rc";
 remove_line init.rc "init.mcd.rc";
-insert_line init.rc "init.mcd.rc" before "import /init.usb.configfs.rc" "import /init.mcd.rc";
+insert_line init.rc "init.mcd.rc" after "import /init.usb.rc" "import /init.mcd.rc";
 
-## some tweaks
-# increase bg-app limits from 32 to 60
-insert_line default.prop "ro.sys.fw.bg_apps_limit=60" before "ro.secure" "ro.sys.fw.bg_apps_limit=60";
-# Enable 2.4GHz channel bonding
-$bb mount -o rw,remount -t auto /system;
-$bb mount -o rw,remount -t auto /vendor 2>/dev/null;
-replace_line /system/vendor/etc/wifi/WCNSS_qcom_cfg.ini "gChannelBondingMode24GHz=0" "gChannelBondingMode24GHz=1";
-$bb mount -o ro,remount -t auto /system;
-$bb mount -o ro,remount -t auto /vendor 2>/dev/null;
-
-unmount_all;
-
+## end ramdisk changes
 
 # sepolicy
 $bin/magiskpolicy --load sepolicy --save sepolicy \
@@ -128,10 +121,6 @@ $bin/magiskpolicy --load sepolicy_debug --save sepolicy_debug \
     "allow untrusted_app hal_memtrack_hwservice hwservice_manager { find }" \
     ;
 
-# Give modules in ramdisk appropriate permissions to allow them to be loaded
-find $ramdisk/modules -type f -exec chmod 644 {} \;
-
-# end ramdisk changes
 
 write_boot;
 

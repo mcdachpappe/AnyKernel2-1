@@ -1,3 +1,15 @@
+on init
+    # Set default schedTune value for foreground/top-app
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.boost 1
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+
+    # zRAM configuration
+    write /sys/block/zram0/comp_algorithm lz4
+    write /sys/block/zram0/max_comp_streams 4
+    write /sys/block/zram0/disksize 536870912
+    write /proc/sys/vm/page-cluster 0
+
 on late-fs
     # Tweak IO performance during boot up
     write /sys/block/sda/queue/iostats 0
@@ -25,6 +37,18 @@ on boot
     # Enable sched boost in boot
     write /proc/sys/kernel/sched_boost 1
 
+    # Set light thermal restrictions while optimizing apps
+    # [throttle_freq_LITTLE, throttle_freq_big, throttle_temp, unthrottle_temp]
+    write /sys/kernel/msm_thermal/zone0 "1286400 1670400 46 44"
+    write /sys/kernel/msm_thermal/zone1 "1286400 1516800 50 46"
+    write /sys/kernel/msm_thermal/zone2 "1036800 1286400 55 50"
+    write /sys/kernel/msm_thermal/zone3 "768000 748800 65 55"
+    write /sys/kernel/msm_thermal/enabled 1
+
+on post-fs
+    exec u:r:init:s0 -- /system/bin/mkswap /dev/block/zram0
+    exec u:r:init:s0 -- /system/bin/swapon /dev/block/zram0
+
 on property:sys.boot_completed=1    
     # update cpusets now that boot is complete and we want better load balancing
     write /dev/cpuset/top-app/cpus 0-3
@@ -34,7 +58,7 @@ on property:sys.boot_completed=1
     write /dev/cpuset/system-background/cpus 0-1,3
     write /dev/cpuset/restricted/cpus 0-1
 
-    # CHOWN/CHMOD
+    # CHOWN
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -42,12 +66,12 @@ on property:sys.boot_completed=1
     chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
     chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
 
-    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
-    chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-    chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_cont
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_hue
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_invert
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_sat
+    chown system system /sys/devices/platform/kcal_ctrl.0/kcal_val
 
     # Set I/O scheduler
     setprop sys.io.scheduler "maple"
@@ -61,10 +85,10 @@ on property:sys.boot_completed=1
     write /sys/block/dm-1/queue/scheduler maple
     write /sys/block/sda/queue/nr_requests 128
     write /sys/block/sde/queue/nr_requests 128
-    write /sys/block/sda/queue/read_ahead_kb 512
-    write /sys/block/sde/queue/read_ahead_kb 512
-    write /sys/block/dm-0/queue/read_ahead_kb 512
-    write /sys/block/dm-1/queue/read_ahead_kb 512   
+    write /sys/block/sda/queue/read_ahead_kb 256
+    write /sys/block/sde/queue/read_ahead_kb 256
+    write /sys/block/dm-0/queue/read_ahead_kb 256
+    write /sys/block/dm-1/queue/read_ahead_kb 256
 
     # Disable Serial Console
     write /sys/module/printk/parameters/console_suspend N
@@ -75,8 +99,11 @@ on property:sys.boot_completed=1
 
     # exec user scripts
     exec u:r:init:s0 -- /init.mcd.sh
+    exec u:r:su:s0 root root -- /init.supolicy.sh
     exec u:r:su:s0 root root -- /init.mcd.sh
+    exec u:r:magisk:s0 root root -- /init.supolicy.sh
     exec u:r:magisk:s0 root root -- /init.mcd.sh
+    exec u:r:supersu:s0 root root -- /init.supolicy.sh
     exec u:r:supersu:s0 root root -- /init.mcd.sh
 
     # write to dmsg

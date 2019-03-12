@@ -56,6 +56,8 @@ dump_boot;
 ## begin ramdisk changes
 
 # Import mcd.rc
+remove_line init.rc "init.fk.rc";
+remove_line init.rc "performance_profiles"
 remove_line init.rc "init.mcd.rc";
 insert_line init.rc "init.mcd.rc" after "import /init.usb.rc" "import /init.mcd.rc";
 

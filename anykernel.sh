@@ -46,12 +46,12 @@ case "$android_ver" in
   "8.0.0"|"8.1.0"|"9") compatibility_string="your version is supported!";;
 esac;
 
+ui_print " ";
 ui_print "Android $android_ver detected, $compatibility_string";
 
 
 ## AnyKernel install
 dump_boot;
-
 
 ## begin ramdisk changes
 
@@ -59,25 +59,33 @@ dump_boot;
 remove_line init.rc "init.fk.rc";
 remove_line init.rc "performance_profiles"
 remove_line init.rc "init.mcd.rc";
-insert_line init.rc "init.mcd.rc" after "import /init.usb.rc" "import /init.mcd.rc";
+insert_line init.rc "init.mcd.rc" after "import /init.usb.configfs.rc" "import /init.mcd.rc";
 
 ## end ramdisk changes
 
 # sepolicy
 $bin/magiskpolicy --load sepolicy --save sepolicy \
-    "allow init rootfs file execute_no_trans" \
+    "allow { audioserver system_server location sensors } diag_device chr_file { read write }" \
     "allow { init modprobe } rootfs system module_load" \
-    "allow init { system_file vendor_file vendor_configs_file } file mounton" \
     "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } file { getattr read open }" \
     "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } dir { getattr read open }" \
+    "allow init { system_file vendor_file vendor_configs_file } file mounton" \
+    "allow init rootfs file execute_no_trans" \
     "allow hal_perf_default hal_perf_default capability { kill }" \
     "allow hal_perf_default hal_graphics_composer_default process { signull }" \
     "allow hal_perf_default kernel dir { read search open }" \
     "allow hal_drm_default oem_prop file { getattr }" \
     "allow hal_iop_default priv_app dir { search }" \
     "allow hal_memtrack_default qti_debugfs file { read open getattr }" \
+    "allow mediaserver mediaserver_tmpfs file { read write execute }" \
     "allow healthd proc_stat file { read open getattr }" \
     "allow healthd healthd capability { sys_ptrace }" \
+    "allow dumpstate fuse dir search" \
+    "allow dumpstate fuse file getattr" \
+    "allow dumpstate theme_data_file file { read open getattr }" \
+    "allow perfd system_server file write" \
+    "allow priv_app { cache_private_backup_file unlabeled } dir getattr" \
+    "allow shell dalvikcache_data_file dir write" \
     "allow untrusted_app proc_stat file { read open getattr }" \
     "allow untrusted_app rootfs file { read open getattr }" \
     "allow untrusted_app faceulnative_exec file { read open getattr }" \
@@ -91,23 +99,41 @@ $bin/magiskpolicy --load sepolicy --save sepolicy \
     "allow untrusted_app cgroup dir { read open getattr }" \
     "allow untrusted_app qti_debugfs dir { search }" \
     "allow untrusted_app hal_memtrack_hwservice hwservice_manager { find }" \
+    "allow untrusted_app sysfs_kgsl dir { read write getattr open }" \
+    "allow untrusted_app sysfs_kgsl file { read write getattr open }" \
+    "allow untrusted_app sysfs dir { read write getattr open }" \
+    "allow untrusted_app sysfs file { read write getattr open }" \
+    "allow untrusted_app sysfs_leds dir search" \
+    "allow untrusted_app sysfs_leds lnk_file read" \
+    "allow untrusted_app sysfs_zram dir search" \
+    "allow untrusted_app sysfs_zram file { read open getattr }" \
+    "allow vold logd dir read" \
+    "allow vold logd lnk_file getattr" \
     ;
 
 # sepolicy_debug
 $bin/magiskpolicy --load sepolicy_debug --save sepolicy_debug \
-    "allow init rootfs file execute_no_trans" \
+    "allow { audioserver system_server location sensors } diag_device chr_file { read write }" \
     "allow { init modprobe } rootfs system module_load" \
-    "allow init { system_file vendor_file vendor_configs_file } file mounton" \
     "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } file { getattr read open }" \
     "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } dir { getattr read open }" \
+    "allow init { system_file vendor_file vendor_configs_file } file mounton" \
+    "allow init rootfs file execute_no_trans" \
     "allow hal_perf_default hal_perf_default capability { kill }" \
     "allow hal_perf_default hal_graphics_composer_default process { signull }" \
     "allow hal_perf_default kernel dir { read search open }" \
     "allow hal_drm_default oem_prop file { getattr }" \
     "allow hal_iop_default priv_app dir { search }" \
     "allow hal_memtrack_default qti_debugfs file { read open getattr }" \
+    "allow mediaserver mediaserver_tmpfs file { read write execute }" \
     "allow healthd proc_stat file { read open getattr }" \
     "allow healthd healthd capability { sys_ptrace }" \
+    "allow dumpstate fuse dir search" \
+    "allow dumpstate fuse file getattr" \
+    "allow dumpstate theme_data_file file { read open getattr }" \
+    "allow perfd system_server file write" \
+    "allow priv_app { cache_private_backup_file unlabeled } dir getattr" \
+    "allow shell dalvikcache_data_file dir write" \
     "allow untrusted_app proc_stat file { read open getattr }" \
     "allow untrusted_app rootfs file { read open getattr }" \
     "allow untrusted_app faceulnative_exec file { read open getattr }" \
@@ -121,6 +147,16 @@ $bin/magiskpolicy --load sepolicy_debug --save sepolicy_debug \
     "allow untrusted_app cgroup dir { read open getattr }" \
     "allow untrusted_app qti_debugfs dir { search }" \
     "allow untrusted_app hal_memtrack_hwservice hwservice_manager { find }" \
+    "allow untrusted_app sysfs_kgsl dir { read write getattr open }" \
+    "allow untrusted_app sysfs_kgsl file { read write getattr open }" \
+    "allow untrusted_app sysfs dir { read write getattr open }" \
+    "allow untrusted_app sysfs file { read write getattr open }" \
+    "allow untrusted_app sysfs_leds dir search" \
+    "allow untrusted_app sysfs_leds lnk_file read" \
+    "allow untrusted_app sysfs_zram dir search" \
+    "allow untrusted_app sysfs_zram file { read open getattr }" \
+    "allow vold logd dir read" \
+    "allow vold logd lnk_file getattr" \
     ;
 
 

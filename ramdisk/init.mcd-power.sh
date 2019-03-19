@@ -87,17 +87,16 @@ echo "844800" > /sys/module/cpu_input_boost/parameters/input_boost_freq_lp
 
 # Set thermal restrictions
 echo "0" > /sys/kernel/msm_thermal/enabled
-echo "1516800 2246400 46 45" > /sys/kernel/msm_thermal/zone0
-echo "1440000 2150400 47 46" > /sys/kernel/msm_thermal/zone1
-echo "1363200 2054400 48 47" > /sys/kernel/msm_thermal/zone2
-echo "1363200 1977600 49 48" > /sys/kernel/msm_thermal/zone3
-echo "1286400 1900800 50 49" > /sys/kernel/msm_thermal/zone4
-echo "1286400 1824000 52 50" > /sys/kernel/msm_thermal/zone5
-echo "1132800 1670400 54 52" > /sys/kernel/msm_thermal/zone6
-echo "1056000 1363200 59 54" > /sys/kernel/msm_thermal/zone7
-echo "902400 1056000 63 59" > /sys/kernel/msm_thermal/zone8
-echo "844800 902400 65 63" > /sys/kernel/msm_thermal/zone9
-echo "768000 748800 70 65" > /sys/kernel/msm_thermal/zone10
+echo "1593800 2150800 40 38" > /sys/kernel/msm_thermal/zone0
+echo "1401600 1785600 41 40" > /sys/kernel/msm_thermal/zone1
+echo "1324800 1555200 42 41" > /sys/kernel/msm_thermal/zone2
+echo "1228800 1478400 43 42" > /sys/kernel/msm_thermal/zone3
+echo "1228800 1401600 44 43" > /sys/kernel/msm_thermal/zone4
+echo "1190400 1324800 46 44" > /sys/kernel/msm_thermal/zone5
+echo "1190400 1248000 48 46" > /sys/kernel/msm_thermal/zone6
+echo "1113600 1190400 53 48" > /sys/kernel/msm_thermal/zone7
+echo "940800 1036800 60 53" > /sys/kernel/msm_thermal/zone8
+echo "729600 729600 65 60" > /sys/kernel/msm_thermal/zone9
 echo "4000" > /sys/kernel/msm_thermal/sampling_ms
 echo "1" > /sys/kernel/msm_thermal/enabled
 

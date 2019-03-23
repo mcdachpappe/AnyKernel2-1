@@ -1,0 +1,63 @@
+on early-init
+    # Tweak IO performance during boot up
+    write /sys/block/sda/queue/iostats 0
+    write /sys/block/sde/queue/iostats 0
+    write /sys/block/sda/queue/scheduler noop
+    write /sys/block/sde/queue/scheduler noop
+    write /sys/block/sda/queue/iosched/slice_idle 0
+    write /sys/block/sde/queue/iosched/slice_idle 0
+    write /sys/block/sda/queue/nr_requests 256
+    write /sys/block/sde/queue/nr_requests 256
+    write /sys/block/sda/queue/read_ahead_kb 2048
+    write /sys/block/sde/queue/read_ahead_kb 2048
+    write /sys/block/dm-0/queue/read_ahead_kb 2048
+    write /sys/block/dm-1/queue/read_ahead_kb 2048
+
+on init
+    # Dynamic Stune Boost during sched_boost
+    write /dev/stune/top-app/schedtune.sched_boost 10
+
+    # Set default schedTune value for foreground/top-app
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.boost 1
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+
+on boot
+    # Update foreground and background cpusets
+    write /dev/cpuset/top-app/cpus 0-3
+    write /dev/cpuset/background/cpus 0-3
+    write /dev/cpuset/foreground/cpus 0-3
+    write /dev/cpuset/foreground/boost/cpus 0-3
+    write /dev/cpuset/system-background/cpus 0-3
+    write /dev/cpuset/restricted/cpus 0-3
+
+    # Enable sched boost in boot
+    write /proc/sys/kernel/sched_boost 1
+
+    # Set light thermal restrictions while optimizing apps
+    # [throttle_freq_LITTLE, throttle_freq_big, throttle_temp, unthrottle_temp]
+    write /sys/kernel/msm_thermal/enabled 0
+    write /sys/kernel/msm_thermal/zone0 "1286400 1670400 46 44"
+    write /sys/kernel/msm_thermal/zone1 "1286400 1516800 50 46"
+    write /sys/kernel/msm_thermal/zone2 "1036800 1286400 55 50"
+    write /sys/kernel/msm_thermal/zone3 "768000 748800 65 55"
+    write /sys/kernel/msm_thermal/enabled 1
+
+on post-fs-data
+    # Bind mount custom system blobs
+    mount auto /perfboostsconfig.xml /system/vendor/etc/perf/perfboostsconfig.xml bind
+
+on property:sys.boot_completed=1
+    exec u:r:init:s0 -- /init.mcd-power.sh
+    exec u:r:su:s0 root root -- /init.mcd-power.sh
+    exec u:r:magisk:s0 root root -- /init.mcd-power.sh
+    # write to dmsg
+    write /dev/kmsg "mcd: boot completed"
+
+service msm_irqbalance /vendor/bin/msm_irqbalance -f /vendor/etc/msm_irqbalance.conf
+    socket msm_irqbalance seqpacket 660 root system
+    class core
+    user root
+    group root
+    writepid /dev/cpuset/system-background/tasks
+

@@ -69,6 +69,28 @@ bb=/tmp/anykernel/tools/busybox;
 chmod 755 $bb;
 $bb chmod -R 755 tools bin;
 
+# clear terminal window
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+ui_print " ";
+
 if [ -f banner ]; then
   while IFS='' read -r line || $bb [[ -n "$line" ]]; do
     ui_print "$line";
@@ -76,6 +98,8 @@ if [ -f banner ]; then
   ui_print " ";
   ui_print " ";
 fi;
+
+sleep 2
 
 ui_print "$(file_getprop anykernel.sh kernel.string)";
 if [ -f version ]; then

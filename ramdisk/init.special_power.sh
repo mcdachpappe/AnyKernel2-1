@@ -31,6 +31,8 @@ function writepid_top_app() {
 
 sleep 20
 
+## write pids to system-background cpuset
+
 QSEECOMD=`pidof qseecomd`
 THERMAL-ENGINE=`pidof thermal-engine`
 TIME_DAEMON=`pidof time_daemon`
@@ -69,6 +71,9 @@ writepid_sbg $IFAADAEMON
 writepid_sbg $LOGCAT
 writepid_sbg $LMKD
 
+## end write pids to system-background cpuset
+
+echo "mcd special power executed" > /dev/kmsg
+
 }&
 
-write /dev/kmsg "mcd special power executed"

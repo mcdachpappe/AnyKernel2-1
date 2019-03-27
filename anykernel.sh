@@ -30,6 +30,7 @@ ramdisk_compression=auto;
 ## AnyKernel file attributes
 # set permissions/ownership for included ramdisk files
 chmod -R 750 $ramdisk/*;
+chmod +x $ramdisk/sbin/spa;
 chown -R root:root $ramdisk/*;
 
 
@@ -46,7 +47,6 @@ fi
 ## start system changes
 mount -o rw,remount -t auto /system >/dev/null;
 
-
 # insert custom inits
 if [ -f /system/vendor/etc/init/hw/init.qcom.rc ]; then
     ui_print " ";
@@ -54,10 +54,43 @@ if [ -f /system/vendor/etc/init/hw/init.qcom.rc ]; then
     # import mcd.rc
     cp /tmp/anykernel/ramdisk/init.mcd.rc /system/vendor/etc/init/hw/init.mcd.rc;
     insert_line /system/vendor/etc/init/hw/init.qcom.rc "init.mcd.rc" after "import /vendor/etc/init/hw/init.qcom.usb.rc" "import /vendor/etc/init/hw/init.mcd.rc";
+    # import spectrum.rc
+    cp /tmp/anykernel/ramdisk/init.spectrum.rc /system/vendor/etc/init/hw/init.spectrum.rc;
+    replace_line /system/vendor/etc/init/hw/init.mcd.rc "import /init.spectrum.rc" "import /vendor/etc/init/hw/init.spectrum.rc";
+    remove_line /system/vendor/etc/init/hw/init.qcom.rc "import /vendor/etc/init/hw/init.spectrum.rc";
     # chmod
     chmod 644 /system/vendor/etc/init/hw/init.mcd.rc;
+    chmod 644 /system/vendor/etc/init/hw/init.spectrum.rc;
 fi
 ## end system changes
+
+
+## start spectrum profiles
+# Add spectrum folders
+if [ ! -d /data/media/0/Spectrum/profiles ]; then
+    ui_print " ";
+    ui_print "  Creating /data/media/0/Spectrum/profiles...";
+    mkdir -p /data/media/0/Spectrum/profiles;
+fi
+# Backup existing profiles
+if ls /data/media/0/Spectrum/profiles/*.profile &>/dev/null; then
+    ui_print " ";
+    ui_print "  Backup existing spectrum profile files...";
+    if [ ! -d /data/media/0/Spectrum/profiles/bak ]; then
+        mkdir /data/media/0/Spectrum/profiles/bak;
+    else
+        rm -f /data/media/0/Spectrum/profiles/bak/*.profile;
+    fi
+    mv /data/media/0/Spectrum/profiles/*.profile /data/media/0/Spectrum/profiles/bak;
+fi
+# Import mcd spectrum profiles
+ui_print " ";
+ui_print "  Importing mcd spectrum profile files...";
+cp /tmp/anykernel/patch/balance.profile /data/media/0/Spectrum/profiles/balance.profile;
+cp /tmp/anykernel/patch/battery.profile /data/media/0/Spectrum/profiles/battery.profile;
+cp /tmp/anykernel/patch/gaming.profile /data/media/0/Spectrum/profiles/gaming.profile;
+cp /tmp/anykernel/patch/performance.profile /data/media/0/Spectrum/profiles/performance.profile;
+## end spectrum profiles
 
 
 ## AnyKernel install

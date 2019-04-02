@@ -46,6 +46,10 @@ chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
 chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
 chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
 
+# gpu
+chmod 0664 /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
+chmod 0664 /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
+
 # display kcal calibration
 chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal
 chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_cont
@@ -77,7 +81,7 @@ echo "1" > /dev/stune/foreground/schedtune.prefer_idle
 echo "1" > /dev/stune/top-app/schedtune.prefer_idle
 
 # Disable thermal hotplug to switch governor
-echo "0" > /sys/module/msm_thermal/core_control/enabled
+#echo "0" > /sys/module/msm_thermal/core_control/enabled
 
 # Bring back main cores CPU 0,2
 echo "1" > /sys/devices/system/cpu/cpu0/online
@@ -96,7 +100,7 @@ echo "10000" > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us
 echo "0" > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable
 
 # Re-enable thermal hotplug
-echo "1" /sys/module/msm_thermal/core_control/enabled
+#echo "1" /sys/module/msm_thermal/core_control/enabled
 
 # CPUFreq control
 echo "307200" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
@@ -148,6 +152,10 @@ echo "256" > /sys/block/sda/queue/read_ahead_kb
 echo "256" > /sys/block/sde/queue/read_ahead_kb
 echo "256" > /sys/block/dm-0/queue/read_ahead_kb
 echo "256" > /sys/block/dm-1/queue/read_ahead_kb
+
+# Enable all LPMs by default
+# This will enable C4, D4, D3, E4 and M3 LPMs
+echo "N" /sys/module/lpm_levels/parameters/sleep_disabled
 
 # Disable Serial Console
 echo "N" > /sys/module/printk/parameters/console_suspend
@@ -203,7 +211,7 @@ writepid_sbg $LMKD
 
 ## end write pids to system-background cpuset
 
-echo "mcd-power.sh executed" > /dev/kmsg
+echo "mcd: mcd-power executed" > /dev/kmsg
 
 }&
 

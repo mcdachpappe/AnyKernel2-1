@@ -9,3 +9,4 @@
 #
 # Ignore some dirs and files
 zImage
+Image.gz-dtb

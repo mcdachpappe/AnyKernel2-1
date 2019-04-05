@@ -11,3 +11,4 @@
 ramdisk/modules/*
 ramdisk/modules/placeholder
 zImage
+Image.gz-dtb

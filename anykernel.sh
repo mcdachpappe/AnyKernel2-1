@@ -37,7 +37,7 @@ chown -R root:root $ramdisk/*;
 oos_ver=$(file_getprop /system/build.prop ro.build.ota.versionname)
 if [ -z $oos_ver ]; then
     ui_print " "
-    ui_print "   Only OxygenOS is supported!"
+    ui_print "  Only OxygenOS is supported!"
     ui_print "Aborting..."
     ui_print " "
     exit 9
@@ -52,7 +52,6 @@ dump_boot;
 # Import mcd.rc
 remove_line init.rc "init.renderzenith.rc";
 remove_line init.rc "init.rz-mcd.rc";
-remove_line init.rc "init.mcd.rc";
 insert_line init.rc "init.mcd.rc" before "import /init.usb.configfs.rc" "import /init.mcd.rc";
 
 ## some tweaks

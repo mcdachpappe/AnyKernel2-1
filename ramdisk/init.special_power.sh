@@ -73,7 +73,7 @@ writepid_sbg $LMKD
 
 ## end write pids to system-background cpuset
 
-echo "mcd special power executed" > /dev/kmsg
+echo "mcd: mcd-power executed" > /dev/kmsg
 
 }&
 

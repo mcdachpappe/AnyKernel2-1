@@ -80,9 +80,6 @@ echo "300" > /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms
 echo "1" > /dev/stune/foreground/schedtune.prefer_idle
 echo "1" > /dev/stune/top-app/schedtune.prefer_idle
 
-# Disable thermal hotplug to switch governor
-#echo "0" > /sys/module/msm_thermal/core_control/enabled
-
 # Bring back main cores CPU 0,2
 echo "1" > /sys/devices/system/cpu/cpu0/online
 echo "1" > /sys/devices/system/cpu/cpu2/online
@@ -98,9 +95,6 @@ echo "schedutil" > /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
 echo "1000" > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us
 echo "10000" > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us
 echo "0" > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable
-
-# Re-enable thermal hotplug
-#echo "1" /sys/module/msm_thermal/core_control/enabled
 
 # CPUFreq control
 echo "307200" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq

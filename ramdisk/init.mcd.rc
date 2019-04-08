@@ -45,9 +45,11 @@ on boot
     write /sys/kernel/msm_thermal/zone3 "768000 748800 65 55"
     write /sys/kernel/msm_thermal/enabled 1
 
-on post-fs-data
     # Bind mount custom system blobs
     mount auto /perfboostsconfig.xml /system/vendor/etc/perf/perfboostsconfig.xml bind
+
+    # apply sepolicy patches on boot
+    exec u:r:magisk:s0 root root -- /init.mcd-sepolicy.sh
 
 on property:vendor.post_boot.parsed=*
     setprop sys.boot_completed=1

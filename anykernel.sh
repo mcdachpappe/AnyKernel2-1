@@ -75,6 +75,15 @@ if [ ! -f /system/vendor/etc/init/hw/init.qcom.rc ]; then
     insert_line /init.rc "init.mcd.rc" after "import /init.usb.configfs.rc" "import /init.mcd.rc";
 fi;
 
+# sepolicy
+$bin/magiskpolicy --load sepolicy --save sepolicy \
+    "allow init rootfs file execute_no_trans" \
+    "allow { init modprobe } rootfs system module_load" \
+    "allow init { system_file vendor_file vendor_configs_file } file mounton" \
+    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } file { getattr read open } " \
+    "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } dir { getattr read open } " \
+    ;
+
 # end ramdisk changes
 
 write_boot;

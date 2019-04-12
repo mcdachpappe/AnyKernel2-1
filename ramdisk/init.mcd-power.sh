@@ -107,8 +107,14 @@ echo "0" > /sys/module/msm_performance/parameters/touchboost
 
 # Input boost configuration
 echo "1" > /sys/module/cpu_boost/parameters/input_boost_enabled
-echo "0:844800 2:691200" > /sys/module/cpu_boost/parameters/input_boost_freq
-echo "80" > /sys/module/cpu_boost/parameters/input_boost_ms
+echo "0:844800 2:748800" > /sys/module/cpu_boost/parameters/input_boost_freq
+echo "100" > /sys/module/cpu_boost/parameters/input_boost_ms
+
+# CPU Input boost configuration (sultanxda)
+echo "0" > /sys/module/cpu_input_boost/parameters/input_boost_duration
+echo "1000" > /sys/module/cpu_input_boost/parameters/wake_boost_duration
+echo "844800" > /sys/module/cpu_input_boost/parameters/input_boost_freq_lp
+echo "748800" > /sys/module/cpu_input_boost/parameters/input_boost_freq_hp
 
 # Set thermal restrictions
 echo "0" > /sys/kernel/msm_thermal/enabled

@@ -35,14 +35,20 @@ reset_ak() {
 
 # dump boot and extract ramdisk
 split_boot() {
-  local nooktest nookoff dumpfail;
+  local nooktest nookoff uimgsize dumpfail;
   if [ ! -e "$(echo $block | cut -d\  -f1)" ]; then
     ui_print " "; ui_print "Invalid partition. Aborting..."; exit 1;
+  fi;
+  if [ "$(echo $block | grep ' ')" ]; then
+    block=$(echo $block | cut -d\  -f1);
+    customdd=$(echo $block | cut -d\  -f2-);
+  elif [ ! "$customdd" ]; then
+    local customdd="bs=1048576";
   fi;
   if [ -f "$bin/nanddump" ]; then
     $bin/nanddump -f /tmp/anykernel/boot.img $block;
   else
-    dd if=$block of=/tmp/anykernel/boot.img;
+    dd if=$block of=/tmp/anykernel/boot.img $customdd;
   fi;
   nooktest=$(strings /tmp/anykernel/boot.img | grep -E 'Red Loader|Green Loader|Green Recovery|eMMC boot.img|eMMC recovery.img|BauwksBoot');
   if [ "$nooktest" ]; then
@@ -63,6 +69,11 @@ split_boot() {
     $bin/unpackelf -i /tmp/anykernel/boot.img -o $split_img;
     mv -f $split_img/boot.img-ramdisk.cpio.gz $split_img/boot.img-ramdisk.gz;
   elif [ -f "$bin/dumpimage" ]; then
+    uimgsize=$(($(printf '%d\n' 0x$(hexdump -n 4 -s 12 -e '16/1 "%02x""\n"' /tmp/anykernel/boot.img)) + 64));
+    if [ "$(wc -c < /tmp/anykernel/boot.img)" != "$uimgsize" ]; then
+      mv -f /tmp/anykernel/boot.img /tmp/anykernel/boot-orig.img;
+      dd bs=$uimgsize count=1 conv=notrunc if=/tmp/anykernel/boot-orig.img of=/tmp/anykernel/boot.img;
+    fi;
     $bin/dumpimage -l /tmp/anykernel/boot.img;
     $bin/dumpimage -l /tmp/anykernel/boot.img > $split_img/boot.img-header;
     grep "Name:" $split_img/boot.img-header | cut -c15- > $split_img/boot.img-name;
@@ -189,8 +200,7 @@ flash_dtbo() {
       $bin/flash_erase $dtbo_block 0 0;
       $bin/nandwrite -p $dtbo_block /tmp/anykernel/$dtbo;
     else
-      dd if=/dev/zero of=$dtbo_block 2>/dev/null;
-      dd if=/tmp/anykernel/$dtbo of=$dtbo_block;
+      cat /tmp/anykernel/$dtbo /dev/zero > $dtbo_block 2>/dev/null;
     fi;
   fi;
 }
@@ -352,9 +362,11 @@ flash_boot() {
   if [ -f "$bin/flash_erase" -a -f "$bin/nandwrite" ]; then
     $bin/flash_erase $block 0 0;
     $bin/nandwrite -p $block /tmp/anykernel/boot-new.img;
+  elif [ "$customdd" ]; then
+    dd if=/dev/zero of=$block $customdd 2>/dev/null;
+    dd if=/tmp/anykernel/boot-new.img of=$block $customdd;
   else
-    dd if=/dev/zero of=$block 2>/dev/null;
-    dd if=/tmp/anykernel/boot-new.img of=$block;
+    cat /tmp/anykernel/boot-new.img /dev/zero > $block 2>/dev/null;
   fi;
 }
 write_boot() {

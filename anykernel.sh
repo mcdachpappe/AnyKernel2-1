@@ -47,10 +47,11 @@ fi
 avail_space=`df -kh /system | grep -v "Filesystem" | awk '{ print $5 }' | cut -d'%' -f1`
 if [ "$avail_space" == "100" ]; then
     ui_print " ";
-    ui_print "  Warning: /system partition is full!";
+    ui_print "  Warning: your /system partition is full.";
     ui_print " ";
-    ui_print "  This Kernel needs ~6 MB free space.";
-    ui_print "  Please delete a System-App proceed";
+    ui_print "  This Kernel needs ~10 MB free space. Please";
+    ui_print "  delete a System-App [e.g. DUO], reboot into";
+    ui_print "  Recovery and try again.";
     ui_print " ";
     ui_print "  - Installer will abort now.";
     ui_print " ";

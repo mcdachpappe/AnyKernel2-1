@@ -35,9 +35,15 @@ chown -R root:root $ramdisk/*;
 ## Alert of unsupported OOS
 oos_ver=$(file_getprop /system/build.prop ro.build.ota.versionname)
 if [ "$oos_ver" != "" ]; then
-    ui_print "  This kernel version was not designed for";
+    ui_print " ";
+    ui_print "  Warning: incompatible ROM detected.";
+    ui_print " ";
+    ui_print "  This Kernel version does not support";
     ui_print "  OxygenOS. Please select the OxygenOS";
-    ui_print "  version of this kernel to proceed.";
+    ui_print "  version of this Kernel to proceed.";
+    ui_print " ";
+    ui_print "  - Installer will abort now.";
+    ui_print " ";
     exit 9
 fi;
 
@@ -47,7 +53,8 @@ mount -o remount,rw /system;
 # insert custom inits
 if [ -f /system/vendor/etc/init/hw/init.qcom.rc ]; then
     ui_print " ";
-    ui_print "- Injecting in /vendor/etc/init/hw/init.qcom.rc...";
+    ui_print "  - Injecting in /vendor/etc/init/hw/init.qcom.rc";
+    ui_print " ";
     # import mcd.rc
     cp /tmp/anykernel/ramdisk/init.mcd.rc /system/vendor/etc/init/hw/init.mcd.rc;
     insert_line /system/vendor/etc/init/hw/init.qcom.rc "init.mcd.rc" after "import /vendor/etc/init/hw/init.qcom.usb.rc" "import /vendor/etc/init/hw/init.mcd.rc";
@@ -71,7 +78,8 @@ dump_boot;
 
 if [ ! -f /system/vendor/etc/init/hw/init.qcom.rc ]; then
     ui_print " ";
-    ui_print "- Injecting in /init.rc...";
+    ui_print "  - Injecting in /init.rc";
+    ui_print " ";
     insert_line /init.rc "init.mcd.rc" after "import /init.usb.configfs.rc" "import /init.mcd.rc";
 fi;
 

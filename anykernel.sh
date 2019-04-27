@@ -2,18 +2,17 @@
 # osm0sis @ xda-developers
 
 ## AnyKernel setup
-# begin properties
+# EDIFY properties
 properties() { '
 kernel.string=
 do.devicecheck=1
 do.modules=0
 do.cleanup=1
 do.cleanuponabort=1
-device.name1=OnePlus 3T
-device.name2=OnePlus3T
-device.name3=oneplus3t
-device.name4=OnePlus3
-device.name5=oneplus3
+device.name1=OnePlus3
+device.name2=oneplus3
+device.name3=OnePlus3T
+device.name4=oneplus3t
 supported.versions=8.0.0
 '; } # end properties
 
@@ -36,12 +35,41 @@ chown -R root:root $ramdisk/*;
 ## Alert of unsupported OxygenOS / Android version
 oos_ver=$(file_getprop /system/build.prop ro.build.ota.versionname)
 if [ -z $oos_ver ]; then
-    ui_print " "
-    ui_print "  Only OxygenOS is supported!"
-    ui_print "Aborting..."
-    ui_print " "
-    exit 9
-fi
+    ui_print " ";
+    ui_print "  OxygenOS only is supported!";
+    ui_print "  - Installer will abort now.";
+    exit 0
+fi;
+
+## start system changes
+mount -o remount,rw /system;
+
+## Alert of insufficient /system space
+avail_space=`df -kh /system | grep -v "Filesystem" | awk '{ print $5 }' | cut -d'%' -f1`
+if [ "$avail_space" == "100" ]; then
+    ui_print " ";
+    ui_print "  Warning: your /system partition is full.";
+    ui_print " ";
+    ui_print "  This Kernel needs at least 10 MB free space";
+    ui_print "  on your /system partition."
+    ui_print " ";
+    ui_print "  Do you want to delete 'G-Play Movies' now?";
+    ui_print " ";
+    ui_print "  Press: Volume Up [YES] || Volume Down [NO]";
+    # keycheck to delete system-app
+    /tmp/anykernel/tools/keycheck; KVAR=$?
+    if [ $KVAR -eq 41 ]; then
+        ui_print " ";
+        ui_print "  - Installer will abort now.";
+        exit 0
+    elif [ $KVAR -eq 42 ]; then
+        ui_print " ";
+        ui_print "  - Deleting Google Play Movies...";
+        rm -rf /system/app/Videos;
+        rm -rf /data/data/com.google.android.videos;
+        rm -f /data/dalvik-cache/*/*Videos.apk* ;
+    fi;
+fi;
 
 
 ## AnyKernel install
@@ -58,13 +86,11 @@ insert_line init.rc "init.mcd.rc" before "import /init.usb.configfs.rc" "import 
 # increase bg-app limits from 32 to 60
 insert_line default.prop "ro.sys.fw.bg_apps_limit=60" before "ro.secure" "ro.sys.fw.bg_apps_limit=60";
 # Enable 2.4GHz channel bonding
-$bb mount -o rw,remount -t auto /system;
-$bb mount -o rw,remount -t auto /vendor 2>/dev/null;
 replace_line /system/vendor/etc/wifi/WCNSS_qcom_cfg.ini "gChannelBondingMode24GHz=0" "gChannelBondingMode24GHz=1";
-$bb mount -o ro,remount -t auto /system;
-$bb mount -o ro,remount -t auto /vendor 2>/dev/null;
 
-unmount_all;
+mount -o remount,ro /system;
+
+## end system changes
 
 
 # sepolicy

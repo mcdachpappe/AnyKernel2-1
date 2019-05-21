@@ -2,7 +2,7 @@
 # osm0sis @ xda-developers
 
 ## AnyKernel setup
-# EDIFY properties
+# begin properties
 properties() { '
 kernel.string=
 do.devicecheck=1
@@ -25,12 +25,10 @@ ramdisk_compression=auto;
 # import patching functions/variables - see for reference
 . /tmp/anykernel/tools/ak2-core.sh;
 
-
 ## AnyKernel file attributes
 # set permissions/ownership for included ramdisk files
 chmod -R 750 $ramdisk/*;
 chown -R root:root $ramdisk/*;
-
 
 ## Alert of unsupported OxygenOS / Android version
 oos_ver=$(file_getprop /system/build.prop ro.build.ota.versionname)
@@ -71,17 +69,6 @@ if [ "$avail_space" == "100" ]; then
     fi;
 fi;
 
-
-## AnyKernel install
-dump_boot;
-
-
-## begin ramdisk changes
-# Import mcd.rc
-remove_line init.rc "init.renderzenith.rc";
-remove_line init.rc "init.rz-mcd.rc";
-insert_line init.rc "init.mcd.rc" before "import /init.usb.configfs.rc" "import /init.mcd.rc";
-
 ## some tweaks
 # increase bg-app limits from 32 to 60
 insert_line default.prop "ro.sys.fw.bg_apps_limit=60" before "ro.secure" "ro.sys.fw.bg_apps_limit=60";
@@ -92,6 +79,19 @@ mount -o remount,ro /system;
 
 ## end system changes
 
+## AnyKernel install
+dump_boot;
+
+## begin ramdisk changes
+# Import mcd.rc
+remove_line init.rc "init.renderzenith.rc";
+remove_line init.rc "init.rz-mcd.rc";
+insert_line init.rc "init.mcd.rc" before "import /init.usb.configfs.rc" "import /init.mcd.rc";
+
+## end ramdisk changes
+
+# Give modules in ramdisk appropriate permissions to allow them to be loaded
+find $ramdisk/modules -type f -exec chmod 644 {} \;
 
 # sepolicy
 $bin/magiskpolicy --load sepolicy --save sepolicy \
@@ -123,12 +123,5 @@ $bin/magiskpolicy --load sepolicy --save sepolicy \
     "allow untrusted_app hal_memtrack_hwservice hwservice_manager { find }" \
     ;
 
-
-# Give modules in ramdisk appropriate permissions to allow them to be loaded
-find $ramdisk/modules -type f -exec chmod 644 {} \;
-
-# end ramdisk changes
-
+# Install the boot image
 write_boot;
-
-## end install

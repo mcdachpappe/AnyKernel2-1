@@ -7,7 +7,7 @@ AnyKernel2 - Flashable Zip Template for Kernel Releases with Ramdisk Modificatio
 
 AnyKernel2 pushes the format even further by allowing kernel developers to modify the underlying ramdisk for kernel feature support easily using a number of included command methods along with properties and variables.
 
-A working script based on DirtyV Kernel for Galaxy Nexus (tuna) is included for reference.
+_A working script based on Galaxy Nexus (tuna) is included for reference._
 
 ## // Properties / Variables ##
 ```
@@ -42,6 +42,10 @@ __supported.versions=__ will match against ro.build.version.release from the cur
 
 `ramdisk_compression=auto` allows automatically repacking the ramdisk with the format detected during unpack. Changing `auto` to `gz`, `lzo`, `lzma`, `xz`, `bz2`, `lz4`, or `lz4-l` (for lz4 legacy) instead forces the repack as that format, and using `cpio` or `none` will force the repack as uncompressed.
 
+`customdd="<arguments>"` may be added to allow specifying additional dd parameters for devices that need to hack their kernel directly into a large partition like mmcblk0.
+
+`slot_select=<active|inactive>` may be added to allow specifying the target slot. If omitted the default remains `active`.
+
 ## // Command Methods ##
 ```
 dump_boot
@@ -65,9 +69,9 @@ patch_prop <prop file> <prop name> <new prop value>
 patch_ueventd <ueventd file> <device node> <permissions> <chown> <chgrp>
 repack_ramdisk
 flash_boot
-write_boot
-reset_ak
 flash_dtbo
+write_boot
+reset_ak [keep]
 ```
 
 __"if search string"__ is the string it looks for to decide whether it needs to add the tweak or not, so generally something to indicate the tweak already exists. __"cmdline entry name"__ behaves somewhat like this as a match check for the name of the cmdline entry to be changed/added by the _patch_cmdline_ function, followed by the full entry to replace it. __"prop name"__ also serves as a match check in _patch_prop_ for a property in the given prop file, but is only the prop name as the prop value is specified separately.
@@ -82,7 +86,9 @@ __"block|mount|fstype|options|flags"__ requires you specify which part (listed i
 
 _dump_boot_ and _write_boot_ are the default method of unpacking/repacking, but for more granular control, or omitting ramdisk changes entirely ("OG AK" mode), these can be separated into _split_boot; unpack_ramdisk_ and _repack_ramdisk; flash_boot_ respectively. _flash_dtbo_ can be used to flash a dtbo image. It is automatically included in _write_boot_ but can be called separately if using "OG AK" mode or creating a dtbo only zip.
 
-Multi-partition zips can be created by removing the ramdisk and patch folders from the zip and including instead "-files" folders named for the partition (without slot suffix), e.g. boot-files + recovery-files, or kernel-files + ramdisk-files (on some Treble devices). These then contain zImage, and ramdisk, patch, etc. subfolders for each partition. To setup for the next partition, simply set `block=` and `ramdisk_compression=` for the new target partition and use the _reset_ak_ command.
+Multi-partition zips can be created by removing the ramdisk and patch folders from the zip and including instead "-files" folders named for the partition (without slot suffix), e.g. boot-files + recovery-files, or kernel-files + ramdisk-files (on some Treble devices). These then contain zImage, and ramdisk, patch, etc. subfolders for each partition. To setup for the next partition, simply set `block=` (without slot suffix) and `ramdisk_compression=` for the new target partition and use the _reset_ak_ command.
+
+Similarly, multi-slot zips can be created with the normal zip layout for the active (current) slot, then resetting for the inactive slot by setting `block=` (without slot suffix) again, `slot_select=inactive` and `ramdisk_compression=` for the target slot and using the _reset_ak keep_ command, which will retain the patch and any added ramdisk files for the next slot.
 
 _backup_file_ may be used for testing to ensure ramdisk changes are made correctly, transparency for the end-user, or in a ramdisk-only "mod" zip. In the latter case _restore_file_ could also be used to create a "restore" zip to undo the changes, but should be used with caution since the underlying patched files could be changed with ROM/kernel updates.
 
@@ -100,6 +106,7 @@ Optional supported binaries which may be placed in /tools to enable built-in exp
 * `flash_erase`, `nanddump`, `nandwrite` - MTD block device support for devices where the `dd` command is not sufficient
 * `pxa-unpackbootimg`, `pxa-mkbootimg` - Samsung/Marvell PXA1088/PXA1908 boot.img format variant support
 * `dumpimage`, `mkimage` - DENX U-Boot uImage format support
+* `mboot` - Intel OSIP Android image format support
 * `unpackelf` - Sony ELF kernel.elf format support, repacking as AOSP standard boot.img for unlocked bootloaders
 * `elftool`, `unpackelf` - Sony ELF kernel.elf format support, repacking as ELF for older Sony devices
 * `mkmtkhdr` - MTK device boot image section headers support
@@ -111,7 +118,7 @@ Optional supported binaries which may be placed in /tools to enable built-in exp
 
 ## // Instructions ##
 
-1. Place zImage in the root (dtb and/or dtbo should also go here for devices that require custom ones, each will fallback to the original if not included)
+1. Place zImage in the root (dt or dtb, and/or dtbo should also go here for devices that require custom ones, each will fallback to the original if not included)
 
 2. Place any required ramdisk files in /ramdisk and modules in /modules (with the full path like /modules/system/lib/modules)
 
@@ -129,7 +136,7 @@ Not required, but any tweaks you can't hardcode into the source (best practice) 
 
 It is also extremely important to note that for the broadest AK2 compatibility it is always better to modify a ramdisk file rather than replace it.
 
-If running into trouble when flashing an AK2 zip, the suffix -debugging may be added to the zip's filename to enable creation of a debug .tgz of /tmp for later examination while booted or on desktop.
+___If running into trouble when flashing an AK2 zip, the suffix -debugging may be added to the zip's filename to enable creation of a debug .tgz of /tmp for later examination while booted or on desktop.___
 
 For further support and usage examples please see the AnyKernel2 XDA thread: https://forum.xda-developers.com/showthread.php?t=2670512
 

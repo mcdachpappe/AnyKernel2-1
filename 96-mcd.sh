@@ -8,137 +8,159 @@ while [ ! mountpoint -q /data ]; do
 done
 
 ## Initiate self-destruct sequence if this kernel isn't installed
-if [ ! grep -q mcd-op6 /proc/version ]; then
-	rm -f /data/adb/magisk_simple/vendor/etc/msm_irqbalance.conf;
-	stop vendor.msm_irqbalance;
-	start vendor.msm_irqbalance;
+if [ ! grep -q mcd-custom /proc/version ]; then
+	rm -f /data/adb/magisk_simple/vendor/etc/perf/perfboostsconfig.xml;
 	rm -f /data/adb/service.d/96-mcd.sh;
 	rm -f /data/adb/service.d/96-mcd-power.sh;
 	exit 0;
-fi
+fi;
 
-## Wait for boot completion
-while [ "$(getprop sys.boot_completed)" != 1 ]; do
+## Wait for post_boot completion
+while [ "$(getprop vendor.post_boot.parsed)" != 1 ]; do
 	sleep 2;
 done
 
-sleep 2;
-
 ## Apply Kernel Settings
-# Update msm_irqbalance configuration
-	stop vendor.msm_irqbalance;
-	start vendor.msm_irqbalance;
 
-sleep 10;
+sleep 5;
 
-# Disable CAF task placement for Big Cores
-	echo 0 > /proc/sys/kernel/sched_walt_rotate_big_tasks;
+# CHMOD
+	# CPU
+	chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+	chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+	chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+	chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+	chmod 0664 /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+	# GPU
+	chmod 0664 /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
+	chmod 0664 /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
+	# KCAL
+	chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal
+	chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_cont
+	chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_hue
+	chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_sat
+	chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_val
 
-# Setup Schedutil Governor
-	# CPU0
-	echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor;
-	echo "schedutil" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor;
-	echo 500 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us;
-	echo 20000 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us;
-	echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/iowait_boost_enable;
-	echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/pl;
-	echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq;
-	# CPU4
-	echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor;
-	echo "schedutil" > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor;
-	echo 500 > /sys/devices/system/cpu/cpufreq/policy4/schedutil/up_rate_limit_us;
-	echo 20000 > /sys/devices/system/cpu/cpufreq/policy4/schedutil/down_rate_limit_us;
-	echo 0 > /sys/devices/system/cpu/cpufreq/policy4/schedutil/iowait_boost_enable;
-	echo 0 > /sys/devices/system/cpu/cpufreq/policy4/schedutil/pl;
-	echo 0 > /sys/devices/system/cpu/cpufreq/policy4/schedutil/hispeed_freq;
+# CHOWN
+	# CPU
+	chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+	chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+	chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+	chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+	chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
 
-# Setup EAS cpusets values for better load balancing
-	echo 0-7 > /dev/cpuset/top-app/cpus;
-# Since we are not using core rotator, lets load balance
-	echo 0-3,6-7 > /dev/cpuset/foreground/cpus;
-	echo 0-1 > /dev/cpuset/background/cpus;
-	echo 0-3  > /dev/cpuset/system-background/cpus;
-# For better screen off idle
-	echo 0-3 > /dev/cpuset/restricted/cpus;
+# Disable sched_boost
+	echo 0 > /proc/sys/kernel/sched_boost;
 
-# Input boost [cpu-boost]
-	#echo 500 > /sys/module/cpu_boost/parameters/input_boost_ms;
-	#echo 15 > /sys/module/cpu_boost/parameters/dynamic_stune_boost;
-	#echo 1500 > /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms;
+# Set default schedTune value for foreground/top-app
+	echo 0 > /dev/stune/top-app/schedtune.boost;
 
-# Custom boost values [cpu-input-boost]
-	# Input boosting
-	echo 500 > /sys/module/cpu_input_boost/parameters/input_boost_duration; # [default 500]
-	echo 902400 > /sys/module/cpu_input_boost/parameters/input_boost_freq_hp; # [default 902400]
-	echo 1056000 > /sys/module/cpu_input_boost/parameters/input_boost_freq_lp; # [default 1056000]
-	## Max-boost frequency (while input boosting)
-	echo 1996800 > /sys/module/cpu_input_boost/parameters/max_boost_freq_hp; # [default 1996800]
-	echo 1766400 > /sys/module/cpu_input_boost/parameters/max_boost_freq_lp; # [default 1766400]
-	## Fallback frequency once the boost is over
-	echo 825600 > /sys/module/cpu_input_boost/parameters/remove_input_boost_freq_perf; # [default 825600]
-	echo 576000 > /sys/module/cpu_input_boost/parameters/remove_input_boost_freq_lp; # [default 576000]
+# Dynamic Stune Boost during sched_boost
+	echo 10 > /dev/stune/top-app/schedtune.sched_boost;
 
-	# Frame boosting (rendering outside of direct user interaction)
-	echo 902400 > /sys/module/cpu_input_boost/parameters/frame_boost_freq_hp; # [default 825600]
-	echo 902400 > /sys/module/cpu_input_boost/parameters/frame_boost_freq_lp; # [default 748800]
+# Stune configuration
+	echo 10 > /sys/module/cpu_boost/parameters/dynamic_stune_boost;
+	echo 300 > /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms;
 
-	# Dynamic stune boost (SchedTune input boost value for top-app)
-	echo 20 > /sys/module/cpu_input_boost/parameters/dynamic_stune_boost; #input_stune_boost # [default 20]
-	## SchedTune max boost value for top-app
-	echo 50 > /sys/module/cpu_input_boost/parameters/max_stune_boost; # [default 50]
-	## SchedTune frame boost value for top-app
-	echo 10 > /sys/module/cpu_input_boost/parameters/frame_stune_boost; # [default 10]
+# Set default schedTune value for foreground/top-app
+	echo 1 > /dev/stune/foreground/schedtune.prefer_idle;
+	echo 1 > /dev/stune/top-app/schedtune.prefer_idle;
 
-	# Screen on boost duration
-	echo 500 > /sys/module/cpu_input_boost/parameters/wake_boost_duration; # [default 1000]
+# Bring back main cores CPU 0,2
+	echo 1 > /sys/devices/system/cpu/cpu0/online;
+	echo 1 > /sys/devices/system/cpu/cpu2/online;
 
-# MSM-Touchboost
+# Configure governor settings for little cluster
+	echo schedutil > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor;
+	echo 1000 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us;
+	echo 10000 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us;
+	echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/iowait_boost_enable;
+
+# Configure governor settings for big cluster
+	echo schedutil > /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor;
+	echo 1000 > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us;
+	echo 10000 > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us;
+	echo 0 > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable;
+
+# Update cpusets now that boot is complete and we want better load balancing
+	echo "0-3" > /dev/cpuset/top-app/cpus;
+	echo "0-3" > /dev/cpuset/foreground/boost/cpus;
+	echo "0-3" > /dev/cpuset/foreground/cpus;
+	echo "0-3 > /dev/cpuset/background/cpus;
+	echo "0-3" > /dev/cpuset/system-background/cpus;
+
+# CPUFreq control
+	echo 307200 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq;
+	echo 1593600 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq;
+	echo 307200 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq;
+	echo 2342400 > sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq;
+
+# MSM-Touchboost configuration
 	echo 0 > /sys/module/msm_performance/parameters/touchboost;
 
-# I/O Scheduler
-	echo "anxiety" > /sys/block/sda/queue/scheduler;
-	echo "anxiety" > /sys/block/sde/queue/scheduler;
+# Input-Boost configuration
+	echo 1 > /sys/module/cpu_boost/parameters/input_boost_enabled;
+	echo "0:1036800 2:748800" > /sys/module/cpu_boost/parameters/input_boost_freq;
+	echo 100 > /sys/module/cpu_boost/parameters/input_boost_ms;
 
-# Adjust Read Ahead
-	echo 128 > /sys/block/sda/queue/read_ahead_kb;
-	echo 128 > /sys/block/dm-0/queue/read_ahead_kb;
+# CPU-Input-Boost configuration
+	echo 0 > /sys/module/cpu_input_boost/parameters/input_boost_duration;
+	echo 1000 > /sys/module/cpu_input_boost/parameters/wake_boost_duration;
+	echo 844800 > /sys/module/cpu_input_boost/parameters/input_boost_freq_lp;
+	echo 748800 > /sys/module/cpu_input_boost/parameters/input_boost_freq_hp;
 
-# Reset zRAM/Swapspace
-	rm /data/vendor/swap/swapfile;
-	swapoff /dev/block/zram0;
-	echo 1 > /sys/block/zram0/reset;
-	echo 1073741824 > /sys/block/zram0/disksize;
-	echo 8 > /sys/block/zram0/max_comp_streams;
-	mkswap /dev/block/zram0;
-	swapon /dev/block/zram0;
+# Thermal-Simple configuration
+	echo 0 > /sys/kernel/msm_thermal/enabled;
+	echo "1516800 2246400 41 40" > /sys/kernel/msm_thermal/zone0;
+	echo "1440000 2150400 42 41" > /sys/kernel/msm_thermal/zone1;
+	echo "1363200 2054400 43 42" > /sys/kernel/msm_thermal/zone2;
+	echo "1363200 1977600 44 43" > /sys/kernel/msm_thermal/zone3;
+	echo "1286400 1900800 45 44" > /sys/kernel/msm_thermal/zone4;
+	echo "1286400 1824000 47 45" > /sys/kernel/msm_thermal/zone5;
+	echo "1132800 1670400 49 47" > /sys/kernel/msm_thermal/zone6;
+	echo "1056000 1363200 54 49" > /sys/kernel/msm_thermal/zone7;
+	echo "902400 1056000 58 54" > /sys/kernel/msm_thermal/zone8;
+	echo "844800 902400 60 58" > /sys/kernel/msm_thermal/zone9;
+	echo "768000 748800 63 60" > /sys/kernel/msm_thermal/zone10;
+	echo 4000 > /sys/kernel/msm_thermal/sampling_ms;
+	echo 1 > /sys/kernel/msm_thermal/enabled;
 
-# Adjust Virtual Memory
-	echo 60 > /proc/sys/vm/swappiness;
-	echo 0 > /proc/sys/vm/compact_unevictable_allowed;
-	echo 10 > /proc/sys/vm/dirty_background_ratio;
-	echo 500 > /proc/sys/vm/dirty_expire_centisecs;
-	echo 30 > /proc/sys/vm/dirty_ratio;
-	echo 3000 > /proc/sys/vm/dirty_writeback_centisecs;
-	echo 0 > /proc/sys/vm/oom_dump_tasks;
-	echo 0 > /proc/sys/vm/oom_kill_allocating_task;
-	echo 1200 > /proc/sys/vm/stat_interval;
-	echo 0 > /proc/sys/vm/swap_ratio;
-	echo 60 > /proc/sys/vm/vfs_cache_pressure;
+# Configure governor for devfreq/kgsl
+	echo "bw_hwmon" > /sys/class/devfreq/soc:qcom,cpubw/governor;
+	echo "msm-adreno-tz" > /sys/class/kgsl/kgsl-3d0/devfreq/governor;
 
-# Exception-trace
-	echo 0 > /proc/sys/debug/exception-trace;
+# Set I/O scheduler
+	setprop sys.io.scheduler "maple"
 
-# Disable printk log spamming to the console
-	echo "0 0 0 0" > /proc/sys/kernel/printk;
+# Tweak IO performance after boot complete
+	echo 1 > /sys/block/sda/queue/iostats;
+	echo 1 > /sys/block/sde/queue/iostats;
+	echo "maple" > /sys/block/sda/queue/scheduler;
+	echo "maple" > /sys/block/sde/queue/scheduler;
+	echo "maple" > /sys/block/dm-0/queue/scheduler;
+	echo "maple" > /sys/block/dm-1/queue/scheduler;
+	echo 128 > /sys/block/sda/queue/nr_requests;
+	echo 128 > /sys/block/sde/queue/nr_requests;
+	echo 256 > /sys/block/sda/queue/read_ahead_kb;
+	echo 256 > /sys/block/sde/queue/read_ahead_kb;
+	echo 256 > /sys/block/dm-0/queue/read_ahead_kb;
+	echo 256 > /sys/block/dm-1/queue/read_ahead_kb;
 
-# USB fast charge
-	echo 1 > /sys/kernel/fast_charge/force_fast_charge;
+# Enable all LPMs by default
+# This will enable C4, D4, D3, E4 and M3 LPMs
+	echo N > /sys/module/lpm_levels/parameters/sleep_disabled;
 
-# PEWQ
-	echo Y > /sys/module/workqueue/parameters/power_efficient;
+# Disable Serial Console
+	echo N > /sys/module/printk/parameters/console_suspend;
 
-# OTG
-	echo 1 > /sys/class/power_supply/usb/otg_switch;
-    
+# Set sync wakee policy tunable
+	echo 1 > /proc/sys/kernel/sched_prefer_sync_wakee_to_waker;
+
+# according to Qcom this legacy value improves first launch latencies
+# stock value is 512k
+	setprop dalvik.vm.heapminfree 2m
+
 # part 1/2 loaded
 	echo "mcd: script 1/2 executed" > /dev/kmsg;

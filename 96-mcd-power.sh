@@ -45,17 +45,6 @@ QSEEPROXYDAEMON=`pidof qseeproxydaemon`
 IFAADAEMON=`pidof ifaadaemon`
 LOGCAT=`pidof logcat`
 LMKD=`pidof lmkd`
-PERFD=`pidof perfd`
-IOP=`pidof iop`
-MSM_IRQBALANCE=`pidof msm_irqbalance`
-SEEMP_HEALTHD=`pidof seemp_healthd`
-ESEPMDAEMON=`pidof esepmdaemon`
-WPA_SUPPLICANT=`pidof wpa_supplicant`
-SEEMPD=`pidof seempd`
-EMBRYO=`pidof embryo`
-HEALTHD=`pidof healthd`
-OEMLOGKIT=`pidof oemlogkit`
-NETD=`pidof netd`
 
 writepid_sbg $QSEECOMD;
 writepid_sbg $THERMAL-ENGINE;
@@ -75,26 +64,10 @@ writepid_sbg $QSEEPROXYDAEMON;
 writepid_sbg $IFAADAEMON;
 writepid_sbg $LOGCAT;
 writepid_sbg $LMKD;
-writepid_sbg $PERFD;
-writepid_sbg $IOP;
-writepid_sbg $MSM_IRQBALANCE;
-writepid_sbg $SEEMP_HEALTHD;
-writepid_sbg $ESEPMDAEMON;
-writepid_sbg $WPA_SUPPLICANT;
-writepid_sbg $SEEMPD;
-writepid_sbg $HEALTHD;
-writepid_sbg $OEMLOGKIT;
-writepid_sbg $NETD;
 
-# running embryo writepid 1 minute after boot up since these
-# daemons take a while to start their different processes
-sleep 60;
-
-writepid_sbg $EMBRYO;
+## end write pids to system-background cpuset
 
 # part 2/2 loaded
 echo "mcd: script 2/2 executed" > /dev/kmsg;
-
-## end write pids to system-background cpuset
 
 }&

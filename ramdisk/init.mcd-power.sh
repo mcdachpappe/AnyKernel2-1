@@ -19,12 +19,6 @@ function writepid_sbg() {
     done;
 }
 
-function writepid_top_app() {
-    until [ ! "$1" ]; do
-        echo -n $1 > /dev/cpuset/top-app/tasks;
-        shift;
-    done;
-}
 ################################################################################
 
 {
@@ -73,7 +67,8 @@ writepid_sbg $LMKD
 
 ## end write pids to system-background cpuset
 
-echo "mcd: mcd-power executed" > /dev/kmsg
+# dmsg output
+echo "mcd: power executed" > /dev/kmsg 
 
 }&
 

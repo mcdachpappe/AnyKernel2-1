@@ -8,4 +8,4 @@ supolicy --live \
     "allow { msm_irqbalanced hal_perf_default } { rootfs kernel } dir { getattr read open } " \
 ;
 
-echo "mcd: mcd-sepolicy executed" > /dev/kmsg
+echo "mcd: sepolicy rules added" > /dev/kmsg;

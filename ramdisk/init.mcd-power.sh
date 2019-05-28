@@ -19,17 +19,25 @@ function writepid_sbg() {
     done;
 }
 
-function writepid_top_app() {
-    until [ ! "$1" ]; do
-        echo -n $1 > /dev/cpuset/top-app/tasks;
-        shift;
-    done;
-}
 ################################################################################
 
 {
 
-sleep 5
+sleep 15
+
+# display kcal calibration
+chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal
+chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_cont
+chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_hue
+chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_sat
+chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_val
+
+chown system system /sys/devices/platform/kcal_ctrl.0/kcal
+chown system system /sys/devices/platform/kcal_ctrl.0/kcal_cont
+chown system system /sys/devices/platform/kcal_ctrl.0/kcal_hue
+chown system system /sys/devices/platform/kcal_ctrl.0/kcal_invert
+chown system system /sys/devices/platform/kcal_ctrl.0/kcal_sat
+chown system system /sys/devices/platform/kcal_ctrl.0/kcal_val
 
 # cpu
 chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
@@ -50,68 +58,61 @@ chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
 chmod 0664 /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
 chmod 0664 /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
 
-# display kcal calibration
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_cont
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_hue
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_sat
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_val
-
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_cont
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_hue
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_sat
-chmod 0664 /sys/devices/platform/kcal_ctrl.0/kcal_val
-
 # Disable sched_boost
-echo "0" > /proc/sys/kernel/sched_boost
+echo 0 > /proc/sys/kernel/sched_boost
 
 # Set default schedTune value for foreground/top-app
-echo "0" > /dev/stune/top-app/schedtune.boost
+echo 0 > /dev/stune/top-app/schedtune.boost
 
 # Dynamic Stune Boost during sched_boost
-echo "10" > /dev/stune/top-app/schedtune.sched_boost
+echo 10 > /dev/stune/top-app/schedtune.sched_boost
 
 # Stune configuration
-echo "10" > /sys/module/cpu_boost/parameters/dynamic_stune_boost
-echo "300" > /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms
+echo 10 > /sys/module/cpu_boost/parameters/dynamic_stune_boost
+echo 300 > /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms
 
 # Set default schedTune value for foreground/top-app
-echo "1" > /dev/stune/foreground/schedtune.prefer_idle
-echo "1" > /dev/stune/top-app/schedtune.prefer_idle
+echo 1 > /dev/stune/foreground/schedtune.prefer_idle
+echo 1 > /dev/stune/top-app/schedtune.prefer_idle
 
 # Bring back main cores CPU 0,2
-echo "1" > /sys/devices/system/cpu/cpu0/online
-echo "1" > /sys/devices/system/cpu/cpu2/online
+echo 1 > /sys/devices/system/cpu/cpu0/online
+echo 1 > /sys/devices/system/cpu/cpu2/online
 
 # Configure governor settings for little cluster
 echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-echo "1000" > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
-echo "10000" > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
-echo "0" > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/iowait_boost_enable
+echo 1000 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
+echo 10000 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
+echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/iowait_boost_enable
 
 # Configure governor settings for big cluster
 echo "schedutil" > /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
-echo "1000" > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us
-echo "10000" > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us
-echo "0" > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable
+echo 1000 > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us
+echo 10000 > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us
+echo 0 > /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable
 
 # CPUFreq control
-echo "307200" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-echo "1593600" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-echo "307200" > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
-echo "2342400" > sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+echo 307200 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+echo 1593600 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+echo 307200 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+echo 2342400 > sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
 
 # Touchboost configuration
-echo "0" > /sys/module/msm_performance/parameters/touchboost
+echo 0 > /sys/module/msm_performance/parameters/touchboost
 
 # Input boost configuration
-echo "1" > /sys/module/cpu_boost/parameters/input_boost_enabled
-echo "0:844800 2:748800" > /sys/module/cpu_boost/parameters/input_boost_freq
-echo "100" > /sys/module/cpu_boost/parameters/input_boost_ms
+echo 1 > /sys/module/cpu_boost/parameters/input_boost_enabled
+echo "0:1056000 2:844800" > /sys/module/cpu_boost/parameters/input_boost_freq
+echo 100 > /sys/module/cpu_boost/parameters/input_boost_ms
+
+# CPU Input boost configuration (sultanxda)
+echo 0 > /sys/module/cpu_input_boost/parameters/input_boost_duration
+echo 1000 > /sys/module/cpu_input_boost/parameters/wake_boost_duration
+echo 1056000 > /sys/module/cpu_input_boost/parameters/input_boost_freq_lp
+echo 844800 > /sys/module/cpu_input_boost/parameters/input_boost_freq_hp
 
 # Set thermal restrictions
-echo "0" > /sys/kernel/msm_thermal/enabled
+echo 0 > /sys/kernel/msm_thermal/enabled
 echo "1516800 2246400 41 40" > /sys/kernel/msm_thermal/zone0
 echo "1440000 2150400 42 41" > /sys/kernel/msm_thermal/zone1
 echo "1363200 2054400 43 42" > /sys/kernel/msm_thermal/zone2
@@ -123,8 +124,8 @@ echo "1056000 1363200 54 49" > /sys/kernel/msm_thermal/zone7
 echo "902400 1056000 58 54" > /sys/kernel/msm_thermal/zone8
 echo "844800 902400 60 58" > /sys/kernel/msm_thermal/zone9
 echo "768000 748800 63 60" > /sys/kernel/msm_thermal/zone10
-echo "4000" > /sys/kernel/msm_thermal/sampling_ms
-echo "1" > /sys/kernel/msm_thermal/enabled
+echo 4000 > /sys/kernel/msm_thermal/sampling_ms
+echo 1 > /sys/kernel/msm_thermal/enabled
 
 # Configure governor for devfreq/kgsl
 echo "bw_hwmon" > /sys/class/devfreq/soc:qcom,cpubw/governor
@@ -134,32 +135,35 @@ echo "msm-adreno-tz" > /sys/class/kgsl/kgsl-3d0/devfreq/governor
 setprop sys.io.scheduler "maple"
 
 # Tweak IO performance after boot complete
-echo "1" > /sys/block/sda/queue/iostats
-echo "1" > /sys/block/sde/queue/iostats
+echo 1 > /sys/block/sda/queue/iostats
+echo 1 > /sys/block/sde/queue/iostats
 echo "maple" > /sys/block/sda/queue/scheduler
 echo "maple" > /sys/block/sde/queue/scheduler
 echo "maple" > /sys/block/dm-0/queue/scheduler
 echo "maple" > /sys/block/dm-1/queue/scheduler
-echo "128" > /sys/block/sda/queue/nr_requests
-echo "128" > /sys/block/sde/queue/nr_requests
-echo "256" > /sys/block/sda/queue/read_ahead_kb
-echo "256" > /sys/block/sde/queue/read_ahead_kb
-echo "256" > /sys/block/dm-0/queue/read_ahead_kb
-echo "256" > /sys/block/dm-1/queue/read_ahead_kb
+echo 128 > /sys/block/sda/queue/nr_requests
+echo 128 > /sys/block/sde/queue/nr_requests
+echo 256 > /sys/block/sda/queue/read_ahead_kb
+echo 256 > /sys/block/sde/queue/read_ahead_kb
+echo 256 > /sys/block/dm-0/queue/read_ahead_kb
+echo 256 > /sys/block/dm-1/queue/read_ahead_kb
 
 # Enable all LPMs by default
 # This will enable C4, D4, D3, E4 and M3 LPMs
-echo "N" /sys/module/lpm_levels/parameters/sleep_disabled
+echo N > /sys/module/lpm_levels/parameters/sleep_disabled
 
 # Disable Serial Console
-echo "N" > /sys/module/printk/parameters/console_suspend
+echo N > /sys/module/printk/parameters/console_suspend
 
 # Set sync wakee policy tunable
-echo "1" > /proc/sys/kernel/sched_prefer_sync_wakee_to_waker
+echo 1 > /proc/sys/kernel/sched_prefer_sync_wakee_to_waker
 
 # according to Qcom this legacy value improves first launch latencies
 # stock value is 512k
 setprop dalvik.vm.heapminfree 2m
+
+# dmsg output
+echo "mcd: power 1/2 completed" > /dev/kmsg
 
 ## write pids to system-background cpuset
 
@@ -205,7 +209,7 @@ writepid_sbg $LMKD
 
 ## end write pids to system-background cpuset
 
-echo "mcd: mcd-power executed" > /dev/kmsg
+# dmsg output
+echo "mcd: power 2/2 completed" > /dev/kmsg 
 
 }&
-

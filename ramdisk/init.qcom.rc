@@ -45,22 +45,24 @@ on boot
     write /sys/kernel/msm_thermal/zone3 "768000 748800 65 55"
     write /sys/kernel/msm_thermal/enabled 1
 
-    # apply sepolicy patches on boot
-    exec u:r:init:s0 -- /init.mcd-sepolicy.sh
-    exec u:r:magisk:s0 root root -- /init.mcd-sepolicy.sh
-
 on post-fs-data
     # Bind mount custom system blobs
     mount auto /perfboostsconfig.xml /system/vendor/etc/perf/perfboostsconfig.xml bind
 
 on property:vendor.post_boot.parsed=*
-    setprop sys.boot_completed=1
+    # Enable Spectrum support
+    setprop spectrum.support 1
+    # Add kernel name
+    setprop persist.spectrum.kernel mcd-kernel
+    # set default profile
+    setprop persist.spectrum.profile 0
 
-on property:sys.boot_completed=1
-    exec u:r:init:s0 -- /init.mcd-power.sh
+    # exec custom script
     exec u:r:magisk:s0 root root -- /init.mcd-power.sh
-    # write to dmsg
-    write /dev/kmsg "mcd: boot completed"
+    exec u:r:magisk:s0 root root -- /init.mcd-sepolicy.sh
+
+    # dmsg output
+    write /dev/kmsg "mcd: init completed"
 
 service msm_irqbalance /vendor/bin/msm_irqbalance -f /vendor/etc/msm_irqbalance.conf
     socket msm_irqbalance seqpacket 660 root system

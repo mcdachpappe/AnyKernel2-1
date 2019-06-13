@@ -1,0 +1,140 @@
+# Power saving profile
+on property:fku.perf.profile=0
+    # Stune-Boost
+    write /dev/stune/top-app/schedtune.sched_boost 0
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.boost 0
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+    # Governor
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor schedutil
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us 1500
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us 5000
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/iowait_boost_enable 0
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor schedutil
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us 1500
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us 5000
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable 0
+    # CPU-Freq
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1286400
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq 748800
+    # Input-Boost
+    write /sys/module/cpu_boost/parameters/input_boost_enabled 1
+    write /sys/module/cpu_boost/parameters/input_boost_freq "0:748800 2:0"
+    write /sys/module/cpu_boost/parameters/input_boost_ms 100
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 0
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms 0
+    # Scheduler
+    setprop sys.io.scheduler "maple"
+    # Thermal
+    write /sys/kernel/msm_thermal/enabled 0
+    write /sys/kernel/msm_thermal/zone0 "1516800 2246400 41 40"
+    write /sys/kernel/msm_thermal/zone1 "1440000 2150400 42 41"
+    write /sys/kernel/msm_thermal/zone2 "1363200 2054400 43 42"
+    write /sys/kernel/msm_thermal/zone3 "1363200 1977600 44 43"
+    write /sys/kernel/msm_thermal/zone4 "1286400 1900800 45 44"
+    write /sys/kernel/msm_thermal/zone5 "1286400 1824000 47 45"
+    write /sys/kernel/msm_thermal/zone6 "1132800 1670400 49 47"
+    write /sys/kernel/msm_thermal/zone7 "1056000 1363200 54 49"
+    write /sys/kernel/msm_thermal/zone8 "902400 1056000 58 54"
+    write /sys/kernel/msm_thermal/zone9 "844800 902400 60 58"
+    write /sys/kernel/msm_thermal/zone10 "768000 748800 63 60"
+    write /sys/kernel/msm_thermal/sampling_ms 8000
+    write /sys/kernel/msm_thermal/enabled 1
+    # dmsg output
+    write /dev/kmsg "mcd: set profile Battery"
+
+# Balance (FK defaults)
+on property:fku.perf.profile=1
+    # Stune-Boost
+    write /dev/stune/top-app/schedtune.sched_boost 10
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.boost 1
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+    # Governor
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor schedutil
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us 1000
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us 10000
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/iowait_boost_enable 0
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor schedutil
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us 1000
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us 10000
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable 0
+    # CPU-Freq
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1593600
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq 2342400
+    # Input-Boost
+    write /sys/module/cpu_boost/parameters/input_boost_enabled 1
+    write /sys/module/cpu_boost/parameters/input_boost_freq "0:1056000 2:844800"
+    write /sys/module/cpu_boost/parameters/input_boost_ms 150
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 10
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms 1000
+    # Scheduler
+    setprop sys.io.scheduler "maple"
+    # Thermal
+    write /sys/kernel/msm_thermal/enabled 0
+    write /sys/kernel/msm_thermal/zone0 "1516800 2246400 41 40"
+    write /sys/kernel/msm_thermal/zone1 "1440000 2150400 42 41"
+    write /sys/kernel/msm_thermal/zone2 "1363200 2054400 43 42"
+    write /sys/kernel/msm_thermal/zone3 "1363200 1977600 44 43"
+    write /sys/kernel/msm_thermal/zone4 "1286400 1900800 45 44"
+    write /sys/kernel/msm_thermal/zone5 "1286400 1824000 47 45"
+    write /sys/kernel/msm_thermal/zone6 "1132800 1670400 49 47"
+    write /sys/kernel/msm_thermal/zone7 "1056000 1363200 54 49"
+    write /sys/kernel/msm_thermal/zone8 "902400 1056000 58 54"
+    write /sys/kernel/msm_thermal/zone9 "844800 902400 60 58"
+    write /sys/kernel/msm_thermal/zone10 "768000 748800 63 60"
+    write /sys/kernel/msm_thermal/sampling_ms 4000
+    write /sys/kernel/msm_thermal/enabled 1
+    # dmsg output
+    write /dev/kmsg "mcd: set profile Balance"
+
+# Performance
+on property:fku.perf.profile=2
+    # Stune-Boost
+    write /dev/stune/top-app/schedtune.sched_boost 15
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.boost 1
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+    # Governor
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor schedutil
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us 500
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us 20000
+    write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/iowait_boost_enable 0
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor schedutil
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/up_rate_limit_us 500
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us 20000
+    write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable 0
+    # CPU-Freq
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2188800
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq 307200
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq 2342400
+    # Input-Boost
+    write /sys/module/cpu_boost/parameters/input_boost_enabled 1
+    write /sys/module/cpu_boost/parameters/input_boost_freq "0:1056000 2:902400"
+    write /sys/module/cpu_boost/parameters/input_boost_ms 500
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost 15
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms 1250
+    # Scheduler
+    setprop sys.io.scheduler "maple"
+    # Thermal
+    write /sys/kernel/msm_thermal/enabled 0
+    write /sys/kernel/msm_thermal/zone0 "1996800 2246400 44 43"
+    write /sys/kernel/msm_thermal/zone1 "1593600 2150400 45 44"
+    write /sys/kernel/msm_thermal/zone2 "1516800 2054400 46 45"
+    write /sys/kernel/msm_thermal/zone3 "1440000 1977600 47 46"
+    write /sys/kernel/msm_thermal/zone4 "1363200 1900800 48 47"
+    write /sys/kernel/msm_thermal/zone5 "1286400 1824000 50 48"
+    write /sys/kernel/msm_thermal/zone6 "1132800 1670400 52 50"
+    write /sys/kernel/msm_thermal/zone7 "1056000 1363200 57 52"
+    write /sys/kernel/msm_thermal/zone8 "902400 1056000 61 57"
+    write /sys/kernel/msm_thermal/zone9 "844800 902400 63 61"
+    write /sys/kernel/msm_thermal/zone10 "768000 748800 66 63"
+    write /sys/kernel/msm_thermal/sampling_ms 4000
+    write /sys/kernel/msm_thermal/enabled 1
+    # dmsg output
+    write /dev/kmsg "mcd: set profile Performance"

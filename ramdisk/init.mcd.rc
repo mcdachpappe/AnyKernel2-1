@@ -1,4 +1,5 @@
 import /init.spectrum.rc
+import /init.performance_profiles.rc
 
 on early-init
     # Tweak IO performance during boot up
@@ -70,18 +71,21 @@ on property:sys.boot_completed=1
     # set default profile
     setprop persist.spectrum.profile 0
 
+    # Enable FKU Profiles support
+    setprop fku.profiles 1
+
     # Disable sched boost
     write /proc/sys/kernel/sched_boost 0
 
     # Stune-Boost
     write /dev/stune/top-app/schedtune.sched_boost 10
     write /dev/stune/foreground/schedtune.prefer_idle 1
-    write /dev/stune/top-app/schedtune.boost 0
+    write /dev/stune/top-app/schedtune.boost 1
     write /dev/stune/top-app/schedtune.prefer_idle 1
 
     # Stune configuration
     write /sys/module/cpu_boost/parameters/dynamic_stune_boost 10
-    write /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms 300
+    write /sys/module/cpu_boost/parameters/dynamic_stune_boost_ms 1000
 
     # Configure governor settings for little cluster
     # Will only work if using EAS
@@ -100,13 +104,10 @@ on property:sys.boot_completed=1
     write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/down_rate_limit_us 10000
     write /sys/devices/system/cpu/cpu2/cpufreq/schedutil/iowait_boost_enable 0
 
-    # Touchboost configuration
-    write /sys/module/msm_performance/parameters/touchboost 0
-
     # Input boost configuration
     write /sys/module/cpu_boost/parameters/input_boost_enabled 1
     write /sys/module/cpu_boost/parameters/input_boost_freq "0:1056000 2:844800"
-    write /sys/module/cpu_boost/parameters/input_boost_ms 100
+    write /sys/module/cpu_boost/parameters/input_boost_ms 150
 
     # CPUFreq control
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 307200
@@ -126,12 +127,12 @@ on property:sys.boot_completed=1
     write /sys/block/dm-1/queue/scheduler "maple"
     write /sys/block/sda/queue/scheduler "maple"
     write /sys/block/sde/queue/scheduler "maple"
-    write /sys/block/dm-0/queue/read_ahead_kb 256
-    write /sys/block/dm-1/queue/read_ahead_kb 256
-    write /sys/block/sda/queue/read_ahead_kb 256
+    write /sys/block/dm-0/queue/read_ahead_kb 128
+    write /sys/block/dm-1/queue/read_ahead_kb 128
+    write /sys/block/sda/queue/read_ahead_kb 128
     write /sys/block/sda/queue/iostats 1
     write /sys/block/sda/queue/nr_requests 128
-    write /sys/block/sde/queue/read_ahead_kb 256
+    write /sys/block/sde/queue/read_ahead_kb 128
     write /sys/block/sde/queue/iostats 1
     write /sys/block/sde/queue/nr_requests 128
     

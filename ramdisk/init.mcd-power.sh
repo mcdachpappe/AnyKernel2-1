@@ -71,4 +71,3 @@ writepid_sbg $LMKD
 echo "mcd: power executed" > /dev/kmsg 
 
 }&
-

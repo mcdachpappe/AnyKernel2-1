@@ -1,4 +1,5 @@
 import /init.spectrum.rc
+import /init.performance_profiles.rc
 
 on early-init
     # Tweak IO performance during boot up
@@ -23,6 +24,13 @@ on init
     write /dev/stune/foreground/schedtune.prefer_idle 1
     write /dev/stune/top-app/schedtune.boost 1
     write /dev/stune/top-app/schedtune.prefer_idle 1
+
+    # zRAM configuration
+    write /sys/block/zram0/comp_algorithm lz4
+    write /sys/block/zram0/disksize 536870912
+    write /sys/block/zram0/max_comp_streams 4
+    write /proc/sys/vm/page-cluster 0
+    write /proc/sys/vm/swappiness 60
 
 on boot
     # Update foreground and background cpusets
@@ -66,6 +74,9 @@ on property:vendor.post_boot.parsed=*
     setprop persist.spectrum.kernel mcd-kernel
     # set default profile
     setprop persist.spectrum.profile 0
+
+    # Enable FKU Profiles support
+    setprop fku.profiles 1
 
     # exec custom script
     exec u:r:magisk:s0 root root -- /init.mcd-power.sh

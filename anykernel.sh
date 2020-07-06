@@ -31,6 +31,17 @@ dump_boot;
 # Clean up other kernels' ramdisk overlay files
 rm -rf $ramdisk/overlay;
 
+# Get string to detect OxygenOS
+str_oos="$(grep "^ro.oxygen.version" /system/build.prop | cut -d= -f2)";
+
+# Reset cmdline
+patch_cmdline "is_custom_rom" "";
+
+# Patch cmdline if OxygenOS is not present
+if [ -z "$str_oos" ]; then
+   patch_cmdline "is_custom_rom" "is_custom_rom";
+fi;
+
 # Install the boot image
 write_boot;
 

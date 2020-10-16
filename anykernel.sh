@@ -30,6 +30,7 @@ dump_boot;
 
 # Clean up other kernels' ramdisk overlay files
 rm -rf $ramdisk/overlay;
+rm -rf $ramdisk/overlay.d;
 
 # Get string to detect OxygenOS
 str_oos="$(grep "^ro.oxygen.version" /system/build.prop | cut -d= -f2)";

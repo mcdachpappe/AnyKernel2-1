@@ -32,5 +32,8 @@ $bin/busybox fstrim -v /data;
 ## AnyKernel boot install
 dump_boot;
 
+# Clean up other kernels' ramdisk overlay files
+find ./overlay.d -maxdepth 2 -type f ! -name "*magisk*" -exec rm {} \;
+
 write_boot;
 ## end install
